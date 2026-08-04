@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nauticworx Partner Map</title>
 <style>html,body{margin:0;padding:0;background:#ffffff;}</style>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-369858862"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LG8CBXS558"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag() { dataLayer.push(arguments); }
   gtag("js", new Date());
-  gtag("config", "G-369858862");
+  gtag("config", "G-LG8CBXS558");
 </script>
 </head>
 <body>
@@ -486,36 +486,30 @@ body.page-id-15425 .entry-content > *:first-child {
 /* 2. Main layout ----------------------------------------------------------- */
 
 #nwx-partner-map-v3 .nwx-sidebar-layout {
-  position: relative;
+  display: grid;
+  grid-template-columns: var(--nwx-sidebar-width) minmax(0, 1fr);
+  gap: 12px;
   width: 100%;
   max-width: 1900px;
   margin: 0 auto;
+  align-items: stretch;
 }
 
 #nwx-partner-map-v3 .nwx-sidebar-panel {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 600;
-  width: var(--nwx-sidebar-width);
-  max-width: calc(100% - 28px);
-  height: auto;
-  max-height: calc(var(--nwx-map-layout-height) - 28px);
+  position: relative;
+  z-index: 500;
+  height: var(--nwx-map-layout-height);
+  max-height: var(--nwx-map-layout-height);
   display: flex;
   flex-direction: column;
   gap: 3px;
   overflow-y: auto;
   overflow-x: hidden;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(12, 28, 43, 0.28);
-  padding: 14px 10px 14px 14px;
+  background: #ffffff;
+  padding: 0 4px 0 0;
 }
 
 #nwx-partner-map-v3 .nwx-map-canvas-column {
-  width: 100%;
   min-width: 0;
   height: var(--nwx-map-layout-height);
 }
@@ -691,7 +685,7 @@ body.page-id-15425 .entry-content > *:first-child {
   gap: 6px;
   padding: 8px 9px;
   border-radius: 0;
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
   overflow: visible;
 }
@@ -712,7 +706,6 @@ body.page-id-15425 .entry-content > *:first-child {
   line-height: 1.25;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #nwx-partner-map-v3 .nwx-filter-intro-text {
@@ -721,7 +714,6 @@ body.page-id-15425 .entry-content > *:first-child {
   font-weight: 600;
   line-height: 1.35;
   margin-top: 4px;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #nwx-partner-map-v3 .nwx-filter-label {
@@ -731,12 +723,11 @@ body.page-id-15425 .entry-content > *:first-child {
   max-width: 100%;
   margin: 0 0 10px;
   color: var(--nwx-map-navy);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #nwx-partner-map-v3 .nwx-keyword-wrap,
@@ -1174,7 +1165,7 @@ body.page-id-15425 .entry-content > *:first-child {
   display: block;
   color: #ffffff;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.3;
 }
 
@@ -4053,18 +4044,3 @@ console.log("NWX consolidated map active");
       if (event.key !== "Escape" || panel.hasAttribute("hidden")) return;
 
       panel.setAttribute("hidden", "");
-      toggle.setAttribute("aria-expanded", "false");
-      toggle.setAttribute("aria-label", "Open frequently asked questions");
-      toggle.focus();
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeNwxFaq);
-  } else {
-    initializeNwxFaq();
-  }
-})();
-
-</script></body>
-</html>
