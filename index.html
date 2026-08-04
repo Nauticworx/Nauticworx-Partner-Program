@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nauticworx Partner Map</title>
 <style>html,body{margin:0;padding:0;background:#ffffff;}</style>
-<!-- Replace G-XXXXXXXXXX with the main site's GA4 Measurement ID (Admin > Data Streams in Google Analytics) so events land in the same property. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-369858862"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -487,30 +486,36 @@ body.page-id-15425 .entry-content > *:first-child {
 /* 2. Main layout ----------------------------------------------------------- */
 
 #nwx-partner-map-v3 .nwx-sidebar-layout {
-  display: grid;
-  grid-template-columns: var(--nwx-sidebar-width) minmax(0, 1fr);
-  gap: 12px;
+  position: relative;
   width: 100%;
   max-width: 1900px;
   margin: 0 auto;
-  align-items: stretch;
 }
 
 #nwx-partner-map-v3 .nwx-sidebar-panel {
-  position: relative;
-  z-index: 500;
-  height: var(--nwx-map-layout-height);
-  max-height: var(--nwx-map-layout-height);
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 600;
+  width: var(--nwx-sidebar-width);
+  max-width: calc(100% - 28px);
+  height: auto;
+  max-height: calc(var(--nwx-map-layout-height) - 28px);
   display: flex;
   flex-direction: column;
   gap: 3px;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #ffffff;
-  padding: 0 4px 0 0;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(12, 28, 43, 0.28);
+  padding: 14px 10px 14px 14px;
 }
 
 #nwx-partner-map-v3 .nwx-map-canvas-column {
+  width: 100%;
   min-width: 0;
   height: var(--nwx-map-layout-height);
 }
