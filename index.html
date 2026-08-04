@@ -2588,6 +2588,11 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
     var panStartY = 0;
     var panStartViewX = 0;
     var panStartViewY = 0;
+    var isPinching = false;
+    var pinchStartDistance = 0;
+    var pinchStartZoom = 1;
+    var pinchMidX = 0;
+    var pinchMidY = 0;
 
     var COUNTRY_PIN_OVERRIDES = {
       US: { x: 9.3, y: 41.6 },
@@ -2872,9 +2877,10 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
       var containerH = containerRect.height;
       var contentAspect = mapView.w / mapView.h;
       var containerAspect = containerW / containerH;
+      var isSlice = svgMap.getAttribute("preserveAspectRatio") === "xMidYMid slice";
 
       var renderedW, renderedH;
-      if (containerAspect > contentAspect) {
+      if (isSlice ? containerAspect <= contentAspect : containerAspect > contentAspect) {
         renderedH = containerH;
         renderedW = renderedH * contentAspect;
       } else {
@@ -2977,6 +2983,11 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
     positionPin(pin);
   });
 }
+    function updateAspectMode() {
+      var isMobile = window.innerWidth <= 1000;
+      svgMap.setAttribute("preserveAspectRatio", isMobile ? "xMidYMid slice" : "xMidYMid meet");
+    }
+
     function updateMapView() {
       keepViewInBounds();
       svgMap.setAttribute("viewBox", mapView.x + " " + mapView.y + " " + mapView.w + " " + mapView.h);
@@ -3084,6 +3095,46 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
     stage.addEventListener("pointerup", stopPanning);
     stage.addEventListener("pointercancel", stopPanning);
     stage.addEventListener("pointerleave", stopPanning);
+
+    function touchDistance(touches) {
+      var dx = touches[0].clientX - touches[1].clientX;
+      var dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    stage.addEventListener("touchstart", function (event) {
+      if (shouldIgnoreGesture(event)) return;
+      if (event.touches.length !== 2) return;
+
+      isPanning = false;
+      isPinching = true;
+      pinchStartDistance = touchDistance(event.touches);
+      pinchStartZoom = mapZoom;
+
+      var rect = stage.getBoundingClientRect();
+      pinchMidX = (event.touches[0].clientX + event.touches[1].clientX) / 2 - rect.left;
+      pinchMidY = (event.touches[0].clientY + event.touches[1].clientY) / 2 - rect.top;
+
+      event.preventDefault();
+    }, { passive: false });
+
+    stage.addEventListener("touchmove", function (event) {
+      if (!isPinching || event.touches.length !== 2) return;
+
+      var newDistance = touchDistance(event.touches);
+      var scale = newDistance / pinchStartDistance;
+      setMapZoom(pinchStartZoom * scale, pinchMidX, pinchMidY);
+
+      event.preventDefault();
+    }, { passive: false });
+
+    function stopPinching(event) {
+      if (event && event.touches && event.touches.length >= 2) return;
+      isPinching = false;
+    }
+
+    stage.addEventListener("touchend", stopPinching);
+    stage.addEventListener("touchcancel", stopPinching);
 
     function getCountryPoint(code) {
       var cleanCode = cleanText(code).toUpperCase();
@@ -4092,8 +4143,18 @@ updateFeedOptions({});
 renderRegionPins([]);
 renderFilters();
 renderCards([]);
+updateAspectMode();
 updateMapView();
 loadPartners();
+
+var aspectResizeTimer = null;
+window.addEventListener("resize", function () {
+  clearTimeout(aspectResizeTimer);
+  aspectResizeTimer = setTimeout(function () {
+    updateAspectMode();
+    updateMapView();
+  }, 150);
+});
 
 console.log("NWX consolidated map active");
   }
