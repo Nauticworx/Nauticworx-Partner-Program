@@ -409,6 +409,7 @@
             <div class="nwx-testimonial-kicker">Trusted Partners </div>
             <h2 class="nwx-testimonial-title">Learn more about our Partners</h2>
             <div class="nwx-testimonial-subtitle">
+              Partners with testimonials are highlighted on the map and shown below.
             </div>
           </div>
 
@@ -2538,6 +2539,7 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
 
     var cleanPartners = [];
     var feedOptions = {};
+    var viewedPartnerNames = {};
     var activeKeyword = "";
     var activeCategories = [];
     var activeSubcategories = [];
@@ -2640,7 +2642,7 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
     function metaLink(label, url, className) {
       if (!label) return "";
       if (!url) return escapeHtml(label);
-      return '<a class="nwx-meta-link ' + escapeAttr(className || "") + '" href="' + escapeAttr(url) + '">' + escapeHtml(label) + '</a>';
+      return '<a class="nwx-meta-link ' + escapeAttr(className || "") + '" href="' + escapeAttr(url) + '" target="_blank" rel="noopener">' + escapeHtml(label) + '</a>';
     }
 
     function metaSeparator() {
@@ -3422,7 +3424,7 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
           '<div class="nwx-region-title-row nwx-profile-header-row">' +
             '<div><div class="nwx-modal-kicker">Partner Profile</div></div>' +
             '<div class="nwx-modal-actions">' +
-              '<a class="nwx-region-cta" href="' + escapeAttr(getRegionUrl(partner.region)) + '">View Region Page</a>' +
+              '<a class="nwx-region-cta" href="' + escapeAttr(getRegionUrl(partner.region)) + '" target="_blank" rel="noopener">View Region Page</a>' +
               '<button class="nwx-close" type="button" aria-label="Close partner details">×</button>' +
             '</div>' +
           '</div>' +
@@ -3536,6 +3538,16 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
         return '<div class="nwx-featured-partner-card" role="button" tabindex="0" data-index="' + index + '">' + partnerCard(partner, { showTestimonial: false }) + '</div>';
       }).join("");
 
+      featured.forEach(function (partner) {
+        if (!partner.name || viewedPartnerNames[partner.name]) return;
+        viewedPartnerNames[partner.name] = true;
+        trackEvent("partner_profile_view", {
+          partner_name: partner.name,
+          region: partner.region || "",
+          category: partner.category || ""
+        });
+      });
+
       grid.querySelectorAll(".nwx-featured-partner-card").forEach(function (card) {
         stopLinkPropagation(card);
 
@@ -3607,7 +3619,14 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
         results.classList.remove("is-open");
         closeModal();
         renderAll();
-        trackEvent("map_filter_select", { filter_name: filterName, filter_value: value });
+        trackEvent("map_filter_select", {
+          filter_name: filterName,
+          filter_value: value,
+          active_categories: activeCategories.join("|"),
+          active_subcategories: activeSubcategories.join("|"),
+          active_regions: activeRegions.join("|"),
+          active_countries: activeCountries.join("|")
+        });
       }
 
       function draw(forceAll) {
@@ -3927,7 +3946,7 @@ if (filterBar && !filterBar.querySelector(".nwx-filter-intro")) {
 
   filterIntro.innerHTML =
     '<div class="nwx-filter-intro-title">Nauticworx Partner Program</div>' +
-    '<div class="nwx-filter-intro-text">Learn more about our trusted partners.</div>';
+    '<div class="nwx-filter-intro-text">Apply filters to find relevant Nauticworx partners.</div>';
 
   filterBar.insertBefore(filterIntro, filterBar.firstChild);
 }
@@ -3962,7 +3981,10 @@ if (testimonialSection) {
     root.addEventListener("click", function (event) {
       var pin = event.target.closest(".nwx-region-pin");
       if (pin) {
-        trackEvent("map_pin_click", { pin_label: pin.getAttribute("aria-label") || "" });
+        trackEvent("map_pin_click", {
+          pin_label: pin.getAttribute("aria-label") || "",
+          has_partners: !pin.classList.contains("nwx-coming-soon")
+        });
       }
 
       var card = event.target.closest(".nwx-partner-card, .nwx-featured-partner-card");
@@ -4007,11 +4029,6 @@ console.log("NWX consolidated map active");
 
 
 (function () {
-  function trackEvent(name, params) {
-    if (typeof window.gtag !== "function") return;
-    window.gtag("event", name, params || {});
-  }
-
   function initializeNwxFaq() {
     var root = document.getElementById("nwx-partner-map-v3");
     if (!root || root.dataset.faqInitialized === "true") return;
@@ -4035,7 +4052,6 @@ console.log("NWX consolidated map active");
           ? "Close frequently asked questions"
           : "Open frequently asked questions"
       );
-      trackEvent("map_faq_toggle", { state: opening ? "open" : "closed" });
     });
 
     panel.querySelectorAll(".nwx-faq-item").forEach(function (item) {
