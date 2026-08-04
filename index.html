@@ -691,7 +691,7 @@ body.page-id-15425 .entry-content > *:first-child {
   gap: 6px;
   padding: 8px 9px;
   border-radius: 0;
-  background: #ffffff;
+  background: transparent;
   box-shadow: none;
   overflow: visible;
 }
@@ -712,6 +712,7 @@ body.page-id-15425 .entry-content > *:first-child {
   line-height: 1.25;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #nwx-partner-map-v3 .nwx-filter-intro-text {
@@ -720,6 +721,7 @@ body.page-id-15425 .entry-content > *:first-child {
   font-weight: 600;
   line-height: 1.35;
   margin-top: 4px;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #nwx-partner-map-v3 .nwx-filter-label {
@@ -734,6 +736,7 @@ body.page-id-15425 .entry-content > *:first-child {
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #nwx-partner-map-v3 .nwx-keyword-wrap,
@@ -3925,7 +3928,7 @@ if (filterBar && !filterBar.querySelector(".nwx-filter-intro")) {
 
   filterIntro.innerHTML =
     '<div class="nwx-filter-intro-title">Nauticworx Partner Program</div>' +
-    '<div class="nwx-filter-intro-text">Apply filters to find relevant Nauticworx partners.</div>';
+    '<div class="nwx-filter-intro-text">Learn more about our trusted partners.</div>';
 
   filterBar.insertBefore(filterIntro, filterBar.firstChild);
 }
