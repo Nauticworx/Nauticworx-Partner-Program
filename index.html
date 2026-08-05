@@ -3901,6 +3901,7 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
           if (keywordInput) keywordInput.value = "";
           closeModal();
           renderAll();
+          trackEvent("map_reset_filters");
         });
       }
 
