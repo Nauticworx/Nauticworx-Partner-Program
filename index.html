@@ -2357,6 +2357,10 @@ var BASE_VIEWBOX = { x: -2.45, y: 64.35, w: 1019.9, h: 365 };
 /* Keep the original base box for pin calibration, but constrain the visible
    world vertically so the fully zoomed-out map stops near the northern edge
    of North America/Greenland and the southern edge of South America. */
+/* Hard vertical extent of the fully zoomed-out map. The user may zoom in,
+   but can never zoom out beyond this band or pan above/below it. These values
+   align the upper edge with the requested North America/Greenland cutoff and
+   the lower edge with Cape Horn at the southern tip of South America. */
 var MAP_VISIBLE_TOP = 82;
 var MAP_VISIBLE_BOTTOM = 420;
 var MAP_VISIBLE_HEIGHT = MAP_VISIBLE_BOTTOM - MAP_VISIBLE_TOP;
@@ -2896,8 +2900,12 @@ var mapZoom = WORLD_TILE_WIDTH / INITIAL_VIEWBOX.w;
   });
 }
     function updateAspectMode() {
-      var isMobile = window.innerWidth <= 1000;
-      svgMap.setAttribute("preserveAspectRatio", isMobile ? "xMidYMid slice" : "xMidYMid meet");
+      /* Always fill the map stage vertically. Using "meet" on desktop
+         letterboxed the wide SVG and exposed blank space above and below the
+         permitted world band. "slice" keeps the northern and southern
+         viewBox edges flush with the stage; any unavoidable crop happens on
+         the left/right and remains reachable through horizontal panning. */
+      svgMap.setAttribute("preserveAspectRatio", "xMidYMid slice");
     }
 
     function updateMapView() {
@@ -3986,6 +3994,8 @@ function buildSidebarLayout() {
   shell.appendChild(layout);
   layout.appendChild(sidebar);
   layout.appendChild(mapColumn);
+
+
 
   if (filterBar) {
     topbar.appendChild(filterBar);
