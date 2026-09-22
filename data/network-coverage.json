@@ -11,7 +11,7 @@
       "uniqueAccounts"
     ],
     "taxonomySource": "Canonical 16-region Nauticworx Partner Program taxonomy",
-    "sourceNote": "Aggregated from validated Nauticworx client coverage records; production dataset verified 2026-09-22."
+    "sourceNote": "Generated from live Network_Coverage_Geography (Active=true) and Klanten records on 2026-09-22."
   },
   "regions": [
     {
@@ -21,11 +21,11 @@
         -98,
         45
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 5,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 36,
       "countries": []
     },
     {
@@ -35,11 +35,11 @@
         -58,
         -15
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -49,11 +49,11 @@
         8,
         57
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
-      "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 30,
+      "dualAccounts": 6,
+      "uniqueAccounts": 60,
       "countries": []
     },
     {
@@ -63,11 +63,11 @@
         12,
         40.5
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
-      "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 19,
+      "dualAccounts": 5,
+      "uniqueAccounts": 48,
       "countries": []
     },
     {
@@ -77,11 +77,11 @@
         24,
         43.5
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
-      "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 18,
+      "dualAccounts": 5,
+      "uniqueAccounts": 47,
       "countries": []
     },
     {
@@ -91,11 +91,11 @@
         12,
         27
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -105,11 +105,11 @@
         -4,
         9
       ],
-      "charterers": 15,
-      "brokers": 4,
+      "charterers": 19,
+      "brokers": 6,
       "fleetOwners": 11,
       "dualAccounts": 3,
-      "uniqueAccounts": 27,
+      "uniqueAccounts": 40,
       "countries": []
     },
     {
@@ -119,11 +119,11 @@
         20,
         0
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -133,11 +133,11 @@
         37,
         0
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -147,11 +147,11 @@
         24,
         -28
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 10,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 36,
       "countries": []
     },
     {
@@ -161,11 +161,11 @@
         50,
         24
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
-      "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 10,
+      "dualAccounts": 5,
+      "uniqueAccounts": 38,
       "countries": []
     },
     {
@@ -175,11 +175,11 @@
         40,
         39
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -189,11 +189,11 @@
         78,
         22
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -203,11 +203,11 @@
         115,
         33
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     },
     {
@@ -217,11 +217,11 @@
         108,
         5
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 10,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 36,
       "countries": []
     },
     {
@@ -231,11 +231,11 @@
         134,
         -25
       ],
-      "charterers": 15,
-      "brokers": 3,
-      "fleetOwners": 11,
+      "charterers": 18,
+      "brokers": 4,
+      "fleetOwners": 9,
       "dualAccounts": 3,
-      "uniqueAccounts": 26,
+      "uniqueAccounts": 35,
       "countries": []
     }
   ]
