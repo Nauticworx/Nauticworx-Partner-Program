@@ -1,0 +1,3019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+
+<style>
+  :root {
+    --nwx-navy: #021229;
+    --nwx-navy-soft: #021229;
+    --nwx-orange: #e8642c;
+    --nwx-orange-dim: #c4531f;
+    --nwx-name: #cee2eb;
+    --nwx-water: #06192f;
+    --nwx-land: #eef2f0;
+    --nwx-border: rgba(206, 226, 235, 0.14);
+    --rail-width: 320px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--nwx-navy);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--nwx-name);
+  }
+
+  #app {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--nwx-navy);
+  }
+
+  /* Column holding the map. Kept as its own flex column (rather than
+     folding #map-wrap directly into #app) so a future full-width element
+     under the map only — without ever extending beneath the rail — can be
+     added again without restructuring; currently holds #map-wrap alone. */
+  #map-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+  }
+
+  /* ---------- LEFT RAIL (desktop) ---------- */
+  #rail {
+    width: var(--rail-width);
+    flex: 0 0 var(--rail-width);
+    background: linear-gradient(180deg, var(--nwx-navy) 0%, var(--nwx-navy-soft) 100%);
+    border-right: 1px solid var(--nwx-border);
+    padding: 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+.partner-program-logo {
+  display: block;
+  height: auto;
+  object-fit: auto;
+}
+
+.partner-program-logo-desktop {
+  width: 230px;
+  max-width: 100%;
+}
+
+.partner-program-logo-mobile {
+  width: 145px;
+  max-width: 55vw;
+}
+
+  .rail-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(206, 226, 235, 0.5);
+    margin: 0 0 8px 0;
+  }
+
+  .view-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--nwx-border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 3px;
+  }
+  .view-toggle button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: rgba(206,226,235,0.65);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .view-toggle button.active {
+    background: var(--nwx-orange);
+    color: #fff;
+  }
+  .view-toggle button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  .rail-top { display: flex; flex-direction: column; }
+
+  /* ---------- RAIL: search (presentational — not yet wired to the
+     Partner Directory; the Region/Country drill-down below it is the
+     real, functional navigation) ---------- */
+  .rail-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--nwx-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .rail-search svg { flex: 0 0 auto; opacity: 0.45; }
+  .rail-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--nwx-name);
+    font-size: 12.5px;
+    font-family: inherit;
+  }
+  .rail-search input::placeholder { color: rgba(206,226,235,0.4); }
+
+  /* ---------- RAIL: filter pills (presentational layout shell — these
+     four map to CRM-confirmed fields (Region, Country, Category,
+     Subcategory) but are left unwired until Partner Directory data is
+     deliberately connected in a future pass) ---------- */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .filter-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--nwx-border);
+    border-radius: 7px;
+    padding: 7px 9px;
+    font-size: 11px;
+    color: rgba(206,226,235,0.72);
+    cursor: default;
+  }
+  .filter-pill .chev { opacity: 0.5; font-size: 9px; flex: 0 0 auto; }
+
+  .rail-result-row {
+    font-size: 10.5px;
+    color: rgba(206,226,235,0.45);
+    letter-spacing: 0.2px;
+  }
+
+  /* ---------- RAIL: partner-card area ----------
+     Layout shell only. No Partner Directory data is connected this pass,
+     so this renders an explicit empty state rather than fabricated
+     partner records. */
+  .partner-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    padding: 16px 14px;
+    border: 1px dashed var(--nwx-border);
+    border-radius: 10px;
+    color: rgba(206,226,235,0.4);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .partner-empty-state .t1 { color: rgba(206,226,235,0.6); font-weight: 700; font-size: 11.5px; }
+
+  /* ---------- PARTNER DIRECTORY (Batch 3) ----------
+     Real data, wired separately from Network Coverage. Reuses the existing
+     dark/navy/orange visual language (filter-pill borders, rail-search
+     styling, nwx-orange accents) rather than introducing a new style
+     system. */
+  .filter-select {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--nwx-border);
+    border-radius: 7px;
+    padding: 7px 9px;
+    font-size: 11px;
+    font-family: inherit;
+    color: rgba(206,226,235,0.85);
+    cursor: pointer;
+  }
+  .filter-select:disabled { opacity: 0.4; cursor: not-allowed; }
+  .filter-select option { background: var(--nwx-navy-soft); color: var(--nwx-name); }
+
+  .partner-card-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .partner-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--nwx-border);
+    border-radius: 9px;
+    padding: 11px 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .partner-card:hover,
+  .partner-card.selected {
+    background: rgba(232,100,44,0.10);
+    border-color: rgba(232,100,44,0.35);
+  }
+  .pc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .pc-name { font-size: 13px; font-weight: 800; color: var(--nwx-name); line-height: 1.3; }
+  .pc-premier {
+    flex: 0 0 auto;
+    background: var(--nwx-orange);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+  .pc-cat { font-size: 10.5px; color: var(--nwx-orange); font-weight: 700; }
+  .pc-sub { font-size: 10.5px; color: rgba(206,226,235,0.55); }
+  .pc-meta-row { font-size: 10.5px; color: rgba(206,226,235,0.45); }
+  .pc-contact { font-size: 10.5px; color: rgba(206,226,235,0.6); display: flex; align-items: flex-start; gap: 6px; }
+  .pc-contact .pc-contact-title { color: rgba(206,226,235,0.4); }
+  .pc-actions { display: flex; gap: 6px; margin-top: 4px; }
+
+  /* ---------- PARTNER DIRECTORY icons (redesign pass) ----------
+     Inline SVG, no image assets. Same footprint as the previous PNG
+     icons (17px geo/contact, 15px website) so surrounding layout is
+     unaffected. */
+  .pc-icon-geo, .pc-icon-contact {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+    display: block;
+    color: rgba(206,226,235,0.6);
+    margin-top: 1px;
+  }
+  .pc-icon-website {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    display: inline-block;
+    vertical-align: -2px;
+    margin-left: 6px;
+  }
+
+  /* ---------- SIDEBAR: compact directory entries only (redesign) ----------
+     Replaces full pc-* cards in the rail with a lightweight name+category
+     row + chevron, matching the approved sidebar mockup. Full detail
+     (contact, actions, geography) is never duplicated here — it lives in
+     the List-mode grid card and the profile preview. */
+  .mini-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .mini-card:hover, .mini-card.selected {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(232,100,44,0.45);
+  }
+  .mini-card .mc-text { min-width: 0; }
+  .mini-card .mc-name {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--nwx-name);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-card .mc-meta {
+    font-size: 10.5px;
+    color: rgba(206,226,235,0.5);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mc-chev { width: 14px; height: 14px; flex: 0 0 14px; color: var(--nwx-orange); }
+
+  /* ---------- FLOATING PANEL (drawer) additions (redesign) ---------- */
+  .ppc-kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    color: var(--nwx-orange);
+    font-weight: 800;
+    margin-bottom: 3px;
+  }
+  .ppc-sub { font-size: 11px; color: rgba(206,226,235,0.6); margin-bottom: 10px; }
+  .ppc-more {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid var(--nwx-border);
+    color: var(--nwx-name);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 7px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ppc-more:hover { background: rgba(255,255,255,0.06); }
+
+  /* ---------- PARTNER PREVIEW OVERLAY (redesign, Task 6) ----------
+     Approved preview-overlay UX from partner-preview-test.html, adapted:
+     WordPress blocks iframe embedding, so this renders a data-driven
+     profile from partner.* fields instead of embedding the live page.
+     Opening/closing this overlay never touches filters/search/map view/
+     selected-partner state underneath it. */
+  #partner-preview-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+  }
+  #partner-preview-overlay.visible { display: block; }
+  .ppo-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,8,20,0.6);
+    backdrop-filter: blur(2px);
+  }
+  .ppo-panel {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(560px, calc(100% - 32px));
+    max-height: calc(100% - 48px);
+    overflow-y: auto;
+    background: var(--nwx-navy-soft);
+    border: 1px solid var(--nwx-border);
+    border-radius: 14px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  }
+  .ppo-header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--nwx-navy);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--nwx-border);
+    border-radius: 14px 14px 0 0;
+  }
+  .ppo-header-text { min-width: 0; }
+  .ppo-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--nwx-orange); font-weight: 800; }
+  .ppo-title-link, .ppo-title-plain {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--nwx-name);
+    text-decoration: none;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ppo-title-link:hover { text-decoration: underline; }
+  .ppo-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .ppo-open-full {
+    background: var(--nwx-orange);
+    border: 1px solid var(--nwx-orange);
+    color: #fff;
+    font-weight: 800;
+    font-size: 11.5px;
+    padding: 8px 11px;
+    border-radius: 7px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .ppo-open-full:hover { background: var(--nwx-orange-dim); }
+  .ppo-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--nwx-border);
+    color: var(--nwx-name);
+    font-size: 16px;
+    line-height: 1;
+    padding: 7px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  .ppo-close:hover { background: rgba(255,255,255,0.12); }
+  .ppo-body { padding: 18px 20px 22px; }
+  .ppo-category { font-size: 12px; font-weight: 800; color: var(--nwx-orange); text-transform: uppercase; letter-spacing: 0.3px; }
+  .ppo-subcats { font-size: 12px; color: var(--nwx-name); margin-top: 3px; }
+  .ppo-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 12.5px; color: rgba(206,226,235,0.75); line-height: 1.4; }
+  .ppo-row svg { width: 17px; height: 17px; flex: 0 0 17px; color: rgba(206,226,235,0.6); margin-top: 1px; }
+  .ppo-desc { font-size: 12.5px; color: rgba(206,226,235,0.7); line-height: 1.55; margin-top: 14px; }
+  .ppo-testimonial { font-size: 12.5px; color: rgba(206,226,235,0.6); line-height: 1.55; margin-top: 10px; font-style: italic; border-left: 2px solid var(--nwx-orange); padding-left: 10px; }
+  .ppo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+  .ppo-actions .pc-btn { padding: 10px 10px; font-size: 12px; }
+  .pc-meta-row.has-icon { display: flex; align-items: flex-start; gap: 6px; }
+  .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .pc-btn {
+    flex: 1 1 auto;
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--nwx-border);
+    color: var(--nwx-name);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 6px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .pc-btn:hover { background: rgba(255,255,255,0.09); }
+  .pc-btn.pc-btn-primary { background: var(--nwx-orange); border-color: var(--nwx-orange); color: #fff; }
+  .pc-btn.pc-btn-primary:hover { background: var(--nwx-orange-dim); }
+
+  .partner-empty-state.pd-no-results { cursor: default; }
+
+  /* ---------- PARTNER LIST VIEW (main panel — the "List" half of the
+     Map/List toggle). Absolutely positioned over #map-wrap, shown only
+     when the toggle is set to List; the map itself is untouched
+     underneath (Task 5: do not redesign the map). ---------- */
+  #partner-list-view {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background: var(--nwx-navy);
+    overflow-y: auto;
+    padding: 24px clamp(16px, 4vw, 48px);
+  }
+  #partner-list-view.visible { display: block; }
+  /* Explicit 3/2/1 responsive grid (redesign, Task 3) — was auto-fill. */
+  .plv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .plv-grid .partner-card { height: 100%; }
+  @media (max-width: 1100px) {
+    .plv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .plv-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- RAIL: region/country browse (de-emphasized — the mockup's
+     search/filter/result-card hierarchy is the primary rail content now;
+     this is the same functional region drill-down as before, collapsed
+     by default so it no longer forces rail scrolling — Task 3). ---------- */
+  .rail-browse {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--nwx-border);
+  }
+  .rail-browse-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail-browse-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .rail-browse-toggle .rail-section-title { margin: 0; }
+  .rail-browse-toggle .browse-chev {
+    font-size: 9px;
+    color: rgba(206,226,235,0.4);
+    transition: transform 0.15s ease;
+  }
+  .rail-browse-toggle.expanded .browse-chev { transform: rotate(180deg); }
+  .rail-browse-body { display: none; }
+  .rail-browse-body.expanded { display: block; }
+  .rail-browse-body #region-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+
+  #breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: rgba(206,226,235,0.7);
+  }
+  #breadcrumb .crumb-current {
+    color: var(--nwx-orange);
+    font-weight: 700;
+  }
+
+  #region-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .region-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--nwx-border);
+    border-radius: 7px;
+    padding: 9px 11px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .region-row:hover {
+    background: rgba(232,100,44,0.10);
+    border-color: rgba(232,100,44,0.35);
+  }
+  .region-row .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nwx-name);
+  }
+  .region-row .count {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--nwx-orange);
+  }
+
+  #back-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--nwx-border);
+    color: var(--nwx-name);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    width: fit-content;
+  }
+  #back-btn:hover { background: rgba(255,255,255,0.09); }
+  #back-btn.visible { display: flex; }
+
+  /* ---------- MAP ---------- */
+  #map-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+  }
+  #map { position: absolute; inset: 0; }
+
+  /* ---------- FLOATING SELECTED-PARTNER CARD ----------
+     Presentational shell only (Section 6). Hidden by default and never
+     triggered this pass — no Partner Directory data is connected, so no
+     JS opens it yet. Built now so the layout/CSS exists for a later,
+     deliberate data-wiring pass. */
+  #partner-profile-card {
+    display: none;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 6;
+    width: 260px;
+    max-width: calc(100% - 36px);
+    background: var(--nwx-navy-soft);
+    border: 1px solid var(--nwx-border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  }
+  #partner-profile-card.visible { display: block; }
+  .ppc-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: rgba(206,226,235,0.5);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+  }
+  .ppc-close:hover { color: var(--nwx-name); }
+  .ppc-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--nwx-border);
+    margin-bottom: 10px;
+  }
+  .ppc-name { font-size: 14px; font-weight: 800; color: var(--nwx-name); margin-bottom: 2px; }
+  .ppc-meta { font-size: 10.5px; color: var(--nwx-orange); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
+  .ppc-desc { font-size: 11.5px; color: rgba(206,226,235,0.6); line-height: 1.5; margin-bottom: 12px; }
+  .ppc-contact {
+    width: 100%;
+    background: var(--nwx-orange);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+
+  /* mobile top bar — logo/back row, then a compact Map/List toggle row
+     directly beneath it (mirrors the mockup's mobile hierarchy). */
+  #mobile-bar {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 5;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, rgba(2,18,41,0.92) 0%, rgba(2,18,41,0.0) 100%);
+    pointer-events: none;
+  }
+  .mobile-bar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #mobile-bar > * { pointer-events: auto; }
+  .view-toggle-mobile {
+    align-self: flex-start;
+    width: auto;
+  }
+  .view-toggle-mobile button {
+    padding: 5px 12px;
+    font-size: 11.5px;
+  }
+  #mobile-back {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    background: rgba(2,18,41,0.75);
+    border: 1px solid var(--nwx-border);
+    color: var(--nwx-name);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 7px 11px;
+    border-radius: 20px;
+  }
+  #mobile-back.visible { display: flex; }
+
+  /* mobile search — presentational, same as the desktop rail search */
+  .mobile-search {
+    display: flex;
+    align-items: center;
+    background: rgba(2,18,41,0.7);
+    border: 1px solid var(--nwx-border);
+    border-radius: 8px;
+    padding: 7px 10px;
+  }
+  .mobile-search svg { flex: 0 0 auto; opacity: 0.5; }
+  .mobile-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--nwx-name);
+    font-size: 12px;
+    font-family: inherit;
+  }
+  .mobile-search input::placeholder { color: rgba(206,226,235,0.45); }
+
+  /* mobile stat pill row */
+  #mobile-stats {
+    display: none;
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
+    z-index: 5;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  #mobile-stats .pill {
+    flex: 1;
+    background: rgba(2,18,41,0.85);
+    border: 1px solid var(--nwx-border);
+    border-radius: 10px;
+    padding: 7px 8px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+  }
+  #mobile-stats .pill .num { font-size: 15px; font-weight: 800; color: var(--nwx-name); }
+  #mobile-stats .pill .lbl { font-size: 8.5px; color: rgba(206,226,235,0.55); text-transform: uppercase; }
+  #mobile-stats { justify-content: flex-start; }
+  #mobile-stats .pill { flex: 0 0 auto; min-width: 150px; text-align: left; padding: 8px 14px; }
+
+  /* ---------- WORLD-VIEW REGION CHIPS ----------
+     Region name is always visible (no hover required). Navy fill, thin
+     orange border, white name, orange count. Flat — no glow, no gradient,
+     no oversized bubble. */
+  .nwx-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--nwx-navy);
+    border: 1.5px solid var(--nwx-orange);
+    border-radius: 8px;
+    padding: 6px 11px 6px 13px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    font-family: inherit;
+  }
+  .nwx-chip:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.55);
+  }
+  .nwx-chip .chip-name {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.2px;
+  }
+  .nwx-chip .chip-count {
+    color: var(--nwx-orange);
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  /* ---------- COUNTRY-LEVEL MARKERS ----------
+     Smaller, visually lighter, compact count-only — geographic meaning is
+     precise enough at this zoom that a name chip isn't needed; name is
+     still available via hover/focus label and the popup title. */
+  .nwx-marker {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--nwx-navy);
+    border: 2px solid var(--nwx-orange);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nwx-orange);
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    font-family: inherit;
+  }
+  .nwx-marker:hover {
+    transform: scale(1.08);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.55);
+  }
+  .nwx-marker.country-marker {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(238, 242, 240, 0.96);
+    color: var(--nwx-navy);
+    border: 1.5px solid var(--nwx-orange-dim);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .nwx-marker-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--nwx-name);
+    background: rgba(2,18,41,0.85);
+    padding: 2px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: 0.2px;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+  .nwx-marker-wrap { position: relative; }
+  .nwx-marker-wrap:hover .nwx-marker-label,
+  .nwx-marker-wrap:focus-within .nwx-marker-label { opacity: 1; }
+
+  /* ---------- POPUP ---------- */
+  .mapboxgl-popup-content {
+    background: var(--nwx-navy-soft);
+    border: 1px solid rgba(206,226,235,0.18);
+    border-radius: 10px;
+    padding: 14px 16px 12px 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    font-family: inherit;
+  }
+  .mapboxgl-popup-tip { display: none; }
+  .mapboxgl-popup-close-button {
+    color: rgba(206,226,235,0.6);
+    font-size: 18px;
+    padding: 2px 8px;
+  }
+  .mapboxgl-popup-close-button:hover { color: var(--nwx-name); background: transparent; }
+
+  .nwx-popup-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--nwx-name);
+    margin: 0 0 2px 0;
+  }
+  .nwx-popup-sub {
+    font-size: 10.5px;
+    color: var(--nwx-orange);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+  }
+  .nwx-popup-headline {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .nwx-popup-headline .n { font-size: 26px; font-weight: 800; color: var(--nwx-orange); line-height: 1; }
+  .nwx-popup-headline .l { font-size: 11px; color: rgba(206,226,235,0.6); text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .nwx-popup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 14px;
+    min-width: 200px;
+  }
+  .nwx-popup-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    border-bottom: 1px dashed rgba(206,226,235,0.12);
+    padding-bottom: 4px;
+  }
+  .nwx-popup-row .k { color: rgba(206,226,235,0.65); }
+  .nwx-popup-row .v { font-weight: 700; color: var(--nwx-name); }
+
+  .nwx-popup-action {
+    margin-top: 12px;
+    width: 100%;
+    background: var(--nwx-orange);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .nwx-popup-action:hover { background: var(--nwx-orange-dim); }
+
+  /* mapbox default control tweaks */
+  .mapboxgl-ctrl-top-right { top: 8px; right: 8px; }
+  .mapboxgl-ctrl-group { background: rgba(2,18,41,0.85) !important; border: 1px solid var(--nwx-border) !important; }
+  .mapboxgl-ctrl-group button { filter: invert(0.9) hue-rotate(180deg); }
+
+
+  /* ---------- UI polish: live Partner Program filter treatment ---------- */
+  #rail {
+    scrollbar-color: rgba(206,226,235,0.28) transparent;
+    scrollbar-width: thin;
+  }
+  #rail::-webkit-scrollbar { width: 8px; }
+  #rail::-webkit-scrollbar-track { background: transparent; }
+  #rail::-webkit-scrollbar-thumb {
+    background: rgba(206,226,235,0.24);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  #rail::-webkit-scrollbar-thumb:hover {
+    background: rgba(206,226,235,0.38);
+    background-clip: padding-box;
+  }
+
+  /* Match the live Partner Program typography inside filter controls. */
+  #rail,
+  #rail input,
+  #rail select,
+  #rail button {
+    font-family: Gotham, Helvetica, Arial, sans-serif;
+  }
+
+  /* Search uses the same white pill treatment as the live filter inputs. */
+  #rail .rail-search {
+    width: 100%;
+    min-height: 30px;
+    padding: 0 10px;
+    background: #ffffff;
+    border: 1px solid rgba(16,32,51,0.18);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(16,32,51,0.08);
+    color: #102033;
+    transition: border-color 0.15s ease;
+  }
+  #rail .rail-search:hover,
+  #rail .rail-search:focus-within {
+    border-color: rgba(232,100,44,0.85);
+  }
+  #rail .rail-search svg {
+    color: #102033;
+    opacity: 0.55;
+  }
+  #rail .rail-search input {
+    min-height: 28px;
+    padding: 0;
+    background: transparent;
+    color: #102033;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  #rail .rail-search input::placeholder {
+    color: rgba(16,32,51,0.45);
+    font-weight: 700;
+  }
+
+  /* One full-width filter per row, as in the current Partner Program. */
+  #rail .filter-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  #rail .filter-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Live control dimensions, border, radius, type and shadow. */
+  #rail .filter-select {
+    width: 100%;
+    max-width: 100%;
+    height: 30px;
+    min-height: 30px;
+    padding: 5px 30px 5px 10px;
+    border: 1px solid rgba(16,32,51,0.18);
+    border-radius: 16px;
+    background: #ffffff;
+    color: #102033;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(16,32,51,0.08);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  #rail .filter-select:hover,
+  #rail .filter-select:focus {
+    border-color: rgba(232,100,44,0.85);
+  }
+  #rail .filter-select:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  #rail .filter-select option {
+    background: #ffffff;
+    color: #102033;
+    font-weight: 700;
+  }
+
+  /* Applied filters sit directly below their own field and use the live chips. */
+  #rail .filter-selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 0;
+    margin-top: 4px;
+  }
+  #rail .filter-selected:empty { display: none; }
+  #rail .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    max-width: 100%;
+    padding: 4px 8px;
+    border: 1px solid rgba(232,100,44,0.55);
+    border-radius: 999px;
+    background: #e8642c;
+    color: #102033;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.15;
+    cursor: pointer;
+    white-space: normal;
+    text-align: left;
+  }
+  #rail .filter-chip:hover,
+  #rail .filter-chip:focus {
+    border-color: var(--nwx-orange);
+    background: #fff7f2;
+    outline: none;
+  }
+  #rail .filter-chip .filter-chip-x {
+    color: var(--nwx-orange);
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    flex: 0 0 auto;
+  }
+
+  #rail .nwx-clear-filters-wrap {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: -2px;
+  }
+  #rail .nwx-clear-filters-button {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 0;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--nwx-orange);
+    cursor: pointer;
+    box-shadow: none;
+    opacity: 0.9;
+  }
+  #rail .nwx-clear-filters-button:hover,
+  #rail .nwx-clear-filters-button:focus-visible {
+    background: transparent;
+    border: 0;
+    color: var(--nwx-orange);
+    opacity: 1;
+    outline: none;
+  }
+  #rail .nwx-reset-filter-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
+  /* Partner names are clean by default; underline is an interaction cue only. */
+  a.mc-name, a.pc-name, a.ppc-name, a.nwx-popup-partner-link {
+    text-decoration: none;
+  }
+  a.mc-name:hover, a.pc-name:hover, a.ppc-name:hover, a.nwx-popup-partner-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Category/type icon assets, carried over from the current Partner page. */
+  .mc-category-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: block;
+    object-fit: contain;
+    align-self: center;
+  }
+  .pc-category-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: block;
+    object-fit: contain;
+  }
+  .mini-card {
+    justify-content: flex-start;
+  }
+  .mini-card .mc-text { flex: 1 1 auto; }
+  .mini-card .mc-name {
+    line-height: 1.25;
+    text-decoration: none;
+  }
+  .mini-card .mc-meta {
+    line-height: 1.25;
+  }
+  .mini-card .mc-chev { margin-left: auto; }
+
+  /* List cards borrow the current Partner page's icon-led, structured card feel. */
+  .plv-grid .partner-card {
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(206,226,235,0.22);
+    border-radius: 12px;
+    padding: 14px;
+    gap: 8px;
+    box-shadow: none;
+  }
+  .plv-grid .partner-card:hover,
+  .plv-grid .partner-card.selected {
+    background: rgba(255,255,255,0.065);
+    border-color: rgba(232,100,44,0.62);
+  }
+  .pc-heading {
+    display: grid;
+    grid-template-columns: 42px minmax(0,1fr) auto;
+    align-items: start;
+    gap: 10px;
+  }
+  .pc-heading-copy { min-width: 0; }
+  .pc-heading .pc-top { display: block; }
+  .pc-heading .pc-premier {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+  }
+  .pc-heading .pc-cat { margin-top: 3px; }
+  .plv-grid .pc-name {
+    display: inline;
+    font-size: 14px;
+    line-height: 1.25;
+    color: #ffffff;
+  }
+  .plv-grid .pc-cat {
+    color: var(--nwx-orange);
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+  .plv-grid .pc-sub {
+    margin-left: 52px;
+    color: rgba(206,226,235,0.68);
+  }
+  .plv-grid .pc-contact,
+  .plv-grid .pc-meta-row {
+    color: rgba(206,226,235,0.68);
+  }
+  .plv-grid .pc-actions { margin-top: auto; padding-top: 4px; }
+  #partner-list-view {
+    scrollbar-color: rgba(206,226,235,0.24) transparent;
+    scrollbar-width: thin;
+  }
+  #partner-list-view::-webkit-scrollbar-track { background: transparent; }
+
+  /* Filter-aware Trusted Partner carousel inside region/country popups. */
+  .nwx-popup-partners {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(206,226,235,0.14);
+  }
+  .nwx-popup-partners-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+  }
+  .nwx-popup-partners-title {
+    color: rgba(206,226,235,0.58);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.55px;
+  }
+  .nwx-popup-partner-count {
+    color: rgba(206,226,235,0.45);
+    font-size: 9.5px;
+    font-weight: 700;
+  }
+  .nwx-popup-partner-viewport {
+    overflow: hidden;
+    border: 1px solid rgba(206,226,235,0.13);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.025);
+  }
+  .nwx-popup-partner-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+  }
+  .nwx-popup-partner-track::-webkit-scrollbar { display: none; }
+  .nwx-popup-partner-card {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    min-width: 0;
+    padding: 10px 11px;
+    cursor: pointer;
+  }
+  .nwx-popup-partner-card:hover { background: rgba(255,255,255,0.04); }
+  .nwx-popup-partner-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nwx-popup-partner-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex: 0 0 32px;
+  }
+  .nwx-popup-partner-copy { min-width: 0; }
+  .nwx-popup-partner-name {
+    color: var(--nwx-name);
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-decoration: none;
+  }
+  .nwx-popup-partner-category {
+    margin-top: 2px;
+    color: var(--nwx-orange);
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .nwx-popup-partner-sub {
+    margin-top: 3px;
+    color: rgba(206,226,235,0.56);
+    font-size: 9.5px;
+    line-height: 1.25;
+  }
+  .nwx-popup-partner-geo {
+    margin-top: 7px;
+    color: rgba(206,226,235,0.55);
+    font-size: 9.5px;
+    line-height: 1.3;
+  }
+  .nwx-popup-carousel-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .nwx-popup-carousel-btn {
+    width: 30px;
+    height: 26px;
+    border: 1px solid rgba(206,226,235,0.16);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    color: var(--nwx-name);
+    cursor: pointer;
+    font-weight: 900;
+  }
+  .nwx-popup-carousel-btn:hover { border-color: var(--nwx-orange); color: var(--nwx-orange); }
+  .nwx-popup-no-partners {
+    color: rgba(206,226,235,0.5);
+    font-size: 10px;
+    line-height: 1.35;
+    padding: 2px 0;
+  }
+  .nwx-chip.is-selected {
+    box-shadow: 0 0 0 2px rgba(232,100,44,0.28), 0 3px 12px rgba(0,0,0,0.55);
+  }
+  .nwx-marker.country-marker.is-selected {
+    background: var(--nwx-orange);
+    color: #fff;
+    border-color: #fff;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 860px) {
+    #rail { display: none; }
+    #mobile-bar, #mobile-stats { display: flex; }
+    .nwx-marker { width: 38px; height: 38px; font-size: 13px; }
+    .nwx-marker.country-marker { width: 26px; height: 26px; font-size: 10.5px; }
+    .nwx-chip { padding: 5px 9px 5px 11px; gap: 6px; }
+    .nwx-chip .chip-name { font-size: 10.5px; }
+    .nwx-chip .chip-count { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- ================= DESKTOP LEFT RAIL ================= -->
+<div id="rail">
+  <div class="rail-top">
+    <img
+      src="assets/Partner Program White (Horizontal).png"
+      alt="Nauticworx Partner Program"
+      class="partner-program-logo partner-program-logo-desktop"
+    >
+  </div>
+
+  <div class="view-toggle" role="tablist" aria-label="Map or List view">
+    <button id="toggle-map" class="active" type="button">Map</button>
+    <button id="toggle-list" type="button" title="List view of the Partner Directory">List</button>
+  </div>
+
+  
+  <div class="rail-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+    <input type="text" id="partner-search" placeholder="Search partners..." aria-label="Search partners by name, category, subcategory, country or region">
+  </div>
+
+  <!-- Filter selects — wired to the real Partner Directory feed. Options
+       are populated from actual partner records (not the full reference
+       taxonomy), so every option shown always has at least one result.
+       Region uses partner.regions[] with a legacy partner.region fallback;
+       Subcategory options depend on the selected Category. -->
+  <div class="filter-stack" aria-label="Partner filters">
+    <div class="filter-field">
+      <select class="filter-select" id="filter-region" aria-label="Filter by region"><option value="">Add Region</option></select>
+      <div class="filter-selected" id="filter-region-selected" aria-live="polite"></div>
+    </div>
+    <div class="filter-field">
+      <select class="filter-select" id="filter-country" aria-label="Filter by country"><option value="">Add Country</option></select>
+      <div class="filter-selected" id="filter-country-selected" aria-live="polite"></div>
+    </div>
+    <div class="filter-field">
+      <select class="filter-select" id="filter-category" aria-label="Filter by category"><option value="">Add Category</option></select>
+      <div class="filter-selected" id="filter-category-selected" aria-live="polite"></div>
+    </div>
+    <div class="filter-field">
+      <select class="filter-select" id="filter-subcategory" aria-label="Filter by subcategory"><option value="">Add Subcategory</option></select>
+      <div class="filter-selected" id="filter-subcategory-selected" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- Global filter reset -- same control, icon, and behavior as the
+       current live Partner Program ("Reset all filters" / map_reset_filters),
+       positioned directly after the last filter field. -->
+  <div class="nwx-clear-filters-wrap">
+    <button class="nwx-clear-filters-button" type="button" id="filter-reset-all" aria-label="Reset all filters" title="Reset all filters">
+      <svg class="nwx-reset-filter-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M20 11a8 8 0 1 0-2.34 5.66" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+        <path d="M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="rail-result-row" id="partner-result-count">Loading Partner Directory…</div>
+
+  
+  <div class="partner-card-list" id="partner-card-list">
+    <div class="partner-empty-state">
+      <div class="t1">Loading…</div>
+      <div>Fetching the Partner Directory feed.</div>
+    </div>
+  </div>
+
+  <!-- Region/Country browse — the same functional drill-down as before,
+       de-emphasized per Section 3 (search/filter/result hierarchy above
+       is now primary; this remains fully functional, just not dominant). -->
+  <div class="rail-browse">
+    <div class="rail-browse-header">
+      <button id="back-btn" type="button">&#8592; World view</button>
+      <div id="breadcrumb"></div>
+    </div>
+    <button class="rail-browse-toggle" id="browse-toggle" type="button" aria-expanded="false" aria-controls="browse-body">
+      <span class="rail-section-title" id="list-title">Browse by Region</span>
+      <span class="browse-chev">&#9662;</span>
+    </button>
+    <div class="rail-browse-body" id="browse-body">
+      <div id="region-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MAP COLUMN ================= -->
+<div id="map-column">
+  <div id="map-wrap">
+    <div id="mobile-bar">
+      <div class="mobile-bar-row">
+        <img
+          src="assets/Partner Program White (Horizontal).png"
+          alt="Nauticworx Partner Program"
+          class="partner-program-logo partner-program-logo-mobile"
+        >
+        <button id="mobile-back" type="button">&#8592; World</button>
+      </div>
+      <div class="view-toggle view-toggle-mobile" role="tablist" aria-label="Map or List view">
+        <button id="toggle-map-m" class="active" type="button">Map</button>
+        <button id="toggle-list-m" type="button" title="List view of the Partner Directory">List</button>
+      </div>
+      <div class="mobile-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+        <input type="text" id="partner-search-m" placeholder="Search partners..." aria-label="Search partners by name, category, subcategory, country or region">
+      </div>
+    </div>
+    <div id="map"></div>
+
+    
+    <div id="partner-list-view">
+      <div class="plv-grid" id="partner-list-grid"></div>
+    </div>
+
+    
+    <div id="partner-profile-card">
+      <button type="button" class="ppc-close" id="ppc-close" aria-label="Close">&times;</button>
+      <div class="ppc-kicker">Trusted Partner</div>
+      <span id="ppc-name-wrap"></span>
+      <div class="ppc-sub" id="ppc-sub"></div>
+      <div class="pc-contact" id="ppc-contact-line"></div>
+      <div class="pc-actions">
+        <a class="pc-btn" id="ppc-contact-btn" href="#" target="_blank" rel="noopener">Contact Partner</a>
+        <a class="pc-btn pc-btn-primary" id="ppc-website-btn" href="#" target="_blank" rel="noopener">Visit Website</a>
+      </div>
+      <div class="pc-meta-row" id="ppc-geo-line"></div>
+      <button type="button" class="ppc-more" id="ppc-more">View full profile</button>
+    </div>
+
+    <div id="mobile-stats"></div>
+  </div>
+</div>
+
+
+<div id="partner-preview-overlay" aria-hidden="true">
+  <div class="ppo-backdrop" id="ppo-backdrop"></div>
+  <div class="ppo-panel" role="dialog" aria-modal="true" aria-labelledby="ppo-name">
+    <div class="ppo-header">
+      <div class="ppo-header-text">
+        <div class="ppo-eyebrow">Partner Preview</div>
+        <span id="ppo-name-wrap"></span>
+      </div>
+      <div class="ppo-header-actions">
+        <a id="ppo-open-full" class="ppo-open-full" href="#" target="_blank" rel="noopener">Open Full Partner Page</a>
+        <button type="button" class="ppo-close" id="ppo-close" aria-label="Close preview">&times;</button>
+      </div>
+    </div>
+    <div class="ppo-body">
+      <div class="ppo-category" id="ppo-category"></div>
+      <div class="ppo-subcats" id="ppo-subcats"></div>
+      <div class="ppo-row" id="ppo-contact-row"></div>
+      <div class="ppo-row" id="ppo-geo-row"></div>
+      <div class="ppo-desc" id="ppo-desc"></div>
+      <div class="ppo-testimonial" id="ppo-testimonial"></div>
+      <div class="ppo-actions" id="ppo-actions"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // DEV public token — local/testing only. Do not use in production.
+  mapboxgl.accessToken = "pk.eyJ1IjoibmF1dGljd29yeCIsImEiOiJjbXVhMHFraGgwcG9sMndwbTk1eWMzNWE4In0.bHiQw7FILprNHdzCvDjSTA";
+
+  // Atlantic-centered starting point, used only for the map's initial
+  // construction (before network-coverage.json has loaded). Once data is
+  // available, World view no longer uses a fixed center/zoom — it fits
+  // all 16 region anchors via fitWorldView()/map.fitBounds() below, so
+  // no region chip is clipped against the map edge regardless of which
+  // regions the taxonomy ends up covering.
+  var ATLANTIC_CENTER = [-30, 18];
+  var WORLD_ZOOM_DESKTOP = 2.3;
+  var WORLD_ZOOM_MOBILE = 1.35;
+  var REGION_ZOOM_DESKTOP = 3.6;
+  var REGION_ZOOM_MOBILE = 2.9;
+
+  // Restrained PIXEL offsets (screen-space only) applied to a small number of
+  // region chips whose true geographic anchors sit close enough together at
+  // world-view zoom to visually crowd (computed via Web Mercator projection
+  // at zoom 2.15: Southern Europe/Southeastern Europe ~80px apart, Central
+  // Africa/East Africa ~107px apart — both under a chip's ~110px width).
+  // The underlying region.coordinates value is NEVER changed by this — the
+  // marker's true anchor stays geographically correct; only the rendered
+  // element is nudged. Regions not listed here get [0, 0] (no offset).
+  var REGION_CHIP_OFFSETS = {
+    "southern-europe": [-8, 16],
+    "southeastern-europe": [20, -6],
+    "central-africa": [-10, 10],
+    "east-africa": [14, -8]
+  };
+
+  function isMobile() { return window.innerWidth <= 860; }
+
+  // ---- World-view fit-to-regions (Task 1) ----
+  // Replaces the old fixed ATLANTIC_CENTER/WORLD_ZOOM_* world-view framing
+  // with a computed fitBounds() over the real, unmodified region.coordinates
+  // of all 16 canonical regions. Region coordinates themselves are never
+  // touched — only the camera framing is computed from them. Padding is
+  // generous enough to keep each chip's rendered width/height (not just its
+  // point anchor) clear of the map edge and of the top-right nav control.
+  function fitWorldView(animate) {
+    if (!coverage || !coverage.regions || !coverage.regions.length) return;
+    var bounds = new mapboxgl.LngLatBounds();
+    coverage.regions.forEach(function (region) { bounds.extend(region.coordinates); });
+    var mobile = isMobile();
+    // Mobile: extra top padding clears the logo/toggle/search bar; extra
+    // bottom padding clears the stat pill. Desktop: extra top+right padding
+    // clears the top-right zoom/nav control; generous left/right padding
+    // covers a chip's own rendered width (~130px), not just its point anchor.
+    var padding = mobile
+      ? { top: 150, bottom: 100, left: 34, right: 34 }
+      : { top: 90, bottom: 60, left: 100, right: 110 };
+    map.fitBounds(bounds, {
+      padding: padding,
+      duration: animate === false ? 0 : 900,
+      maxZoom: mobile ? 2.1 : 2.9
+    });
+  }
+
+  // ---- Defensive data validation (Task 1/6 hardening) ----
+  // Confirms, for every region and every country, that id/name/uniqueAccounts
+  // and [lng, lat] coordinates are all present on the SAME object and that
+  // the coordinate pair is in valid range. This exists specifically to catch
+  // — at load time, loudly, in the console — the failure class reported
+  // against the live deploy (a marker rendering at another region's
+  // location): a lat/lng reversal, a missing/malformed pair, or a record
+  // that got separated from its own coordinates during a hand-edit.
+  function validateCoverage(data) {
+    var problems = [];
+    (data.regions || []).forEach(function (region, i) {
+      var where = "regions[" + i + "] (" + (region.name || region.id || "?") + ")";
+      if (!region.id || !region.name) problems.push(where + ": missing id/name");
+      if (typeof region.uniqueAccounts !== "number") problems.push(where + ": uniqueAccounts is not a number");
+      if (!Array.isArray(region.coordinates) || region.coordinates.length !== 2) {
+        problems.push(where + ": coordinates missing or not a [lng,lat] pair");
+      } else {
+        var lng = region.coordinates[0], lat = region.coordinates[1];
+        if (typeof lng !== "number" || lng < -180 || lng > 180) problems.push(where + ": longitude out of range (" + lng + ") — check for lat/lng swap");
+        if (typeof lat !== "number" || lat < -90 || lat > 90) problems.push(where + ": latitude out of range (" + lat + ") — check for lat/lng swap");
+      }
+      (region.countries || []).forEach(function (country, j) {
+        var cwhere = where + " > countries[" + j + "] (" + (country.name || country.id || "?") + ")";
+        if (!Array.isArray(country.coordinates) || country.coordinates.length !== 2) {
+          problems.push(cwhere + ": coordinates missing or not a [lng,lat] pair");
+        } else {
+          var clng = country.coordinates[0], clat = country.coordinates[1];
+          if (typeof clng !== "number" || clng < -180 || clng > 180) problems.push(cwhere + ": longitude out of range (" + clng + ")");
+          if (typeof clat !== "number" || clat < -90 || clat > 90) problems.push(cwhere + ": latitude out of range (" + clat + ")");
+        }
+        if (typeof country.uniqueAccounts !== "number") problems.push(cwhere + ": uniqueAccounts is not a number");
+      });
+    });
+    if (problems.length) {
+      console.error("network-coverage.json validation failed:\n" + problems.join("\n"));
+    } else {
+      console.log("network-coverage.json: all " + data.regions.length + " regions validated (id/name/uniqueAccounts/coordinates all bound to the same record).");
+    }
+    return problems;
+  }
+
+  // Style engine: mapbox/light-v11 (classic style), kept deliberately rather
+  // than switching to Mapbox Standard — see the Batch 4 report for why
+  // (Standard's water/land colors are governed by its v3 config/lightPreset
+  // system, not freely repaintable via setPaintProperty the way a classic
+  // style is, and that couldn't be verified live in this sandbox since
+  // api.mapbox.com is blocked here). This is the Task 6 fallback path:
+  // same engine, flatter projection, more aggressively refined paint
+  // properties to kill the globe look and the leftover visual noise.
+  var map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/light-v11",
+    projection: "mercator", // flat 2D — no globe/sphere presentation
+    center: ATLANTIC_CENTER,
+    zoom: isMobile() ? WORLD_ZOOM_MOBILE : WORLD_ZOOM_DESKTOP,
+    minZoom: 1,
+    maxZoom: 7,
+    dragRotate: false,
+    pitchWithRotate: false,
+    attributionControl: true
+  });
+  map.touchZoomRotate.disableRotation();
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
+
+  // ---- Nauticworx re-skin of the base Mapbox style ----
+  map.on("style.load", function () {
+    try {
+      // Belt-and-braces: force flat Mercator and strip any atmosphere/fog
+      // effect, in case a future style change (or a GL JS default) ever
+      // reintroduces globe/fog. No-ops harmlessly on light-v11, which has
+      // neither by default.
+      if (typeof map.setProjection === "function") map.setProjection("mercator");
+      if (typeof map.setFog === "function") map.setFog(null);
+
+      if (map.getLayer("water")) {
+        map.setPaintProperty("water", "fill-color", "#021229"); // Nauticworx navy
+      }
+      if (map.getLayer("background")) {
+        map.setPaintProperty("background", "background-color", "#eef2f0");
+      }
+      if (map.getLayer("land")) {
+        map.setPaintProperty("land", "background-color", "#eef2f0");
+      }
+      if (map.getLayer("admin-0-boundary")) {
+        map.setPaintProperty("admin-0-boundary", "line-color", "#8fa3ad"); // subtle blue-gray
+        map.setPaintProperty("admin-0-boundary", "line-opacity", 0.45);
+      }
+      if (map.getLayer("admin-1-boundary")) {
+        map.setPaintProperty("admin-1-boundary", "line-opacity", 0.15);
+      }
+      if (map.getLayer("admin-0-boundary-disputed")) {
+        map.setPaintProperty("admin-0-boundary-disputed", "line-color", "#8fa3ad");
+      }
+
+      // Labels: soft navy/gray (not default black) at just enough contrast
+      // to read, so the Nauticworx chips/markers stay visually dominant.
+      var LABEL_INK = "#3a4a56";
+      ["country-label"].forEach(function (id) {
+        if (map.getLayer(id)) {
+          map.setPaintProperty(id, "text-color", LABEL_INK);
+          map.setPaintProperty(id, "text-opacity", 0.6);
+        }
+      });
+      ["settlement-major-label"].forEach(function (id) {
+        if (map.getLayer(id)) {
+          map.setPaintProperty(id, "text-color", LABEL_INK);
+          map.setPaintProperty(id, "text-opacity", 0.45);
+        }
+      });
+      // Minor/secondary labels: pushed near-invisible so they don't compete.
+      ["settlement-minor-label", "settlement-subdivision-label", "poi-label", "airport-label", "road-label", "transit-label", "water-point-label", "water-line-label", "natural-point-label", "natural-line-label"].forEach(function (id) {
+        if (map.getLayer(id)) map.setPaintProperty(id, "text-opacity", 0.1);
+      });
+      // POI icons (not just their text) — minimize per Task 2.
+      ["poi-label", "airport-label"].forEach(function (id) {
+        if (map.getLayer(id)) {
+          try { map.setPaintProperty(id, "icon-opacity", 0.1); } catch (e2) { /* icon-opacity may not apply to every version of this layer */ }
+        }
+      });
+      // Roads/rail/transit geometry: restrained, not emphasized — dim the
+      // actual line work, not just its labels.
+      ["road-motorway-trunk", "road-primary", "road-secondary-tertiary", "road-street", "road-minor",
+       "bridge-motorway-trunk", "bridge-primary", "bridge-secondary-tertiary", "bridge-street",
+       "tunnel-motorway-trunk", "tunnel-primary", "tunnel-secondary-tertiary", "tunnel-street",
+       "road-rail", "road-rail-tracks"].forEach(function (id) {
+        if (map.getLayer(id)) map.setPaintProperty(id, "line-opacity", 0.18);
+      });
+    } catch (e) {
+      console.warn("Style re-skin partial failure (non-fatal):", e);
+    }
+  });
+
+  // ---- state ----
+  var coverage = null;
+  var currentRegions = []; // array of region objects currently shown (0, 1, or many)
+  var markers = [];
+  var _lastIsMobile = isMobile(); // tracks desktop/mobile breakpoint for World-view re-fit on resize (Task 1)
+
+  // Single managed popup reference — at most one popup exists at a time.
+  var activePopup = null;
+  function closeActivePopup() {
+    if (activePopup) {
+      activePopup.remove(); // triggers the popup's own "close" event below
+      activePopup = null;
+    }
+  }
+  // Clicking the map background (not a marker, not the popup itself —
+  // both stop propagation before this can fire) closes whatever popup is
+  // open. Marker elements are outside the canvas's own click-listened
+  // subtree in some Mapbox versions and inside it in others, so every
+  // marker/chip click handler explicitly calls e.stopPropagation() as the
+  // authoritative guard rather than relying on DOM nesting.
+  map.on("click", function () { closeActivePopup(); });
+
+  // Every marker/chip click handler below stops propagation (see above),
+  // which also prevents the Partner Directory's document-level click-away
+  // listener from ever seeing the click bubble up — so the floating
+  // partner profile card was staying open after a map pin click (Priority
+  // 5). Marker handlers call this alongside stopPropagation to dismiss it
+  // explicitly instead of relying on bubbling.
+  function closeFloatingPartnerCard() {
+    if (typeof window.nwxClosePartnerProfileCard === "function") window.nwxClosePartnerProfileCard();
+  }
+
+  var regionList = document.getElementById("region-list");
+  var listTitle = document.getElementById("list-title");
+  var breadcrumb = document.getElementById("breadcrumb");
+  var backBtn = document.getElementById("back-btn");
+  var mobileBack = document.getElementById("mobile-back");
+  var mobileStats = document.getElementById("mobile-stats");
+
+  // ---- "Browse by Region" collapsible (Task 3) ----
+  // Same functional region/country list as before; now collapsed by
+  // default (World view) and auto-expanded on drill-down, so it no longer
+  // dominates the rail now that search/filters/result-card sit above it.
+  var browseToggleBtn = document.getElementById("browse-toggle");
+  var browseBody = document.getElementById("browse-body");
+  function setBrowseExpanded(expanded) {
+    browseBody.classList.toggle("expanded", expanded);
+    browseToggleBtn.classList.toggle("expanded", expanded);
+    browseToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+  }
+  browseToggleBtn.addEventListener("click", function () {
+    setBrowseExpanded(!browseBody.classList.contains("expanded"));
+  });
+
+  // ---- Map/List toggle: desktop + mobile button pairs kept in sync ----
+  // List now shows the Partner Directory list view (Batch 3, Task 5) in
+  // place of the map; the map/Network Coverage code itself is untouched,
+  // just hidden via a CSS class while List is active. The Partner
+  // Directory script (separate <script> block below) listens for the
+  // "nwxviewmode" event rather than this code reaching into it directly.
+  var toggleMapBtns = [document.getElementById("toggle-map"), document.getElementById("toggle-map-m")];
+  var toggleListBtns = [document.getElementById("toggle-list"), document.getElementById("toggle-list-m")];
+  function setViewMode(mode) {
+    closeActivePopup();
+    toggleMapBtns.forEach(function (b) { if (b) b.classList.toggle("active", mode === "map"); });
+    toggleListBtns.forEach(function (b) { if (b) b.classList.toggle("active", mode === "list"); });
+    window.dispatchEvent(new CustomEvent("nwxviewmode", { detail: { mode: mode } }));
+  }
+  toggleMapBtns.forEach(function (b) { if (b) b.addEventListener("click", function () { setViewMode("map"); }); });
+  toggleListBtns.forEach(function (b) { if (b) b.addEventListener("click", function () { setViewMode("list"); }); });
+
+  fetch("data/network-coverage.json")
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function (json) {
+      coverage = json;
+      validateCoverage(coverage);
+      init();
+    })
+    .catch(function (err) {
+      console.error("Failed to load network-coverage.json:", err);
+      document.getElementById("map").innerHTML =
+        '<div style="color:#cee2eb;padding:40px;font-family:sans-serif;">' +
+        "Could not load data/network-coverage.json. If you opened this file directly " +
+        "(file://), serve it over HTTP instead (e.g. <code>python -m http.server</code>) " +
+        "— browsers block fetch() of local JSON files for security reasons." +
+        "</div>";
+    });
+
+  function sumField(regions, field) {
+    return regions.reduce(function (acc, r) { return acc + (r[field] || 0); }, 0);
+  }
+
+  function init() {
+    renderContextStat(); // world-view default
+    if (map.isStyleLoaded()) {
+      showWorldView();
+    } else {
+      map.once("load", showWorldView);
+    }
+  }
+
+  // Single contextual stat, mobile-only now that the desktop KPI strip has
+  // been removed (Task 1) — World view shows the network-wide unique-
+  // account total; drilling into a region shows that region's own total
+  // instead. uniqueAccounts is authoritative and is never derived by
+  // summing the account-type breakdown fields.
+  function renderContextStat(region) {
+    if (region) {
+      mobileStats.innerHTML = mobilePill(region.uniqueAccounts, region.name + " accounts");
+    } else {
+      var totalUnique = sumField(coverage.regions, "uniqueAccounts");
+      mobileStats.innerHTML = mobilePill(totalUnique, "Network accounts");
+    }
+  }
+
+  function mobilePill(num, label) {
+    return '<div class="pill"><div class="num">' + num + '</div><div class="lbl">' + label + "</div></div>";
+  }
+
+  // markerLevel tracks which tier is currently on the map ("region" |
+  // "country" | null). clearMarkers() always empties the map completely
+  // before either view repopulates it, so region and country markers can
+  // never coexist — this is what satisfies "hide all region markers during
+  // drill-down" / "no world markers left floating" (Task 3).
+  var markerLevel = null;
+
+  function clearMarkers() {
+    markers.forEach(function (m) { m.remove(); });
+    markers = [];
+    markerLevel = null;
+  }
+
+  // ---------------- WORLD / REGION-LEVEL VIEW ----------------
+  function showWorldView() {
+    closeActivePopup();
+    currentRegions = [];
+    clearMarkers();
+
+    coverage.regions.forEach(function (region) {
+      var el = buildRegionChipEl(region);
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeFloatingPartnerCard();
+        if (typeof window.nwxSetDirectoryRegionFilter === "function") {
+          window.nwxSetDirectoryRegionFilter(region.name);
+          setTimeout(function () { openRegionPopup(region, null); }, 0);
+        } else {
+          openRegionPopup(region, el);
+        }
+      });
+      var marker = new mapboxgl.Marker({
+        element: el,
+        anchor: "center",
+        // Screen-space-only nudge for a handful of geographically close
+        // regions (see REGION_CHIP_OFFSETS) — the LngLat anchor below is
+        // always the region's real, unmodified coordinates.
+        offset: REGION_CHIP_OFFSETS[region.id] || [0, 0]
+      })
+        .setLngLat(region.coordinates)
+        .addTo(map);
+      markers.push(marker);
+    });
+    markerLevel = "region";
+    console.assert(markers.length === coverage.regions.length,
+      "World view marker count (" + markers.length + ") should equal region count (" + coverage.regions.length + ")");
+
+    fitWorldView();
+    _lastIsMobile = isMobile();
+
+    listTitle.textContent = "Regions";
+    breadcrumb.innerHTML = '<span class="crumb-current">World view</span>';
+    backBtn.classList.remove("visible");
+    mobileBack.classList.remove("visible");
+    renderContextStat();
+
+    renderRegionList();
+    setBrowseExpanded(false); // Task 3: collapsed by default in World view
+  }
+
+  function renderRegionList() {
+    regionList.innerHTML = "";
+    coverage.regions.forEach(function (region) {
+      var row = document.createElement("div");
+      row.className = "region-row";
+      row.innerHTML =
+        '<span class="name">' + region.name + '</span><span class="count">' + region.uniqueAccounts + "</span>";
+      row.addEventListener("click", function () { drillIntoRegion(region); });
+      regionList.appendChild(row);
+    });
+  }
+
+  // ---------------- REGION/COUNTRY-LEVEL VIEW (multi-region aware) ----------------
+  // Filter state is the source of truth for map geography (Priority 3): this
+  // renders every currently-selected region's chip (never just the last one
+  // clicked) plus the country markers for all of them combined, so region
+  // pins never disappear out from under a multi-region selection.
+  function renderMultiRegionContext(regions, activeCountryNames, animate) {
+    closeActivePopup();
+    currentRegions = regions;
+    clearMarkers();
+
+    regions.forEach(function (region) {
+      var regionEl = buildRegionChipEl(region);
+      regionEl.classList.add("is-selected");
+      regionEl.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeFloatingPartnerCard();
+        openRegionPopup(region, regionEl);
+      });
+      var regionMarker = new mapboxgl.Marker({
+        element: regionEl,
+        anchor: "center",
+        offset: REGION_CHIP_OFFSETS[region.id] || [0, 0]
+      }).setLngLat(region.coordinates).addTo(map);
+      markers.push(regionMarker);
+
+      (region.countries || []).forEach(function (country) {
+        var el = buildCountryMarkerEl(country.uniqueAccounts, country.name);
+        if (activeCountryNames && activeCountryNames.indexOf(country.name) !== -1) {
+          var dot = el.querySelector('.country-marker');
+          if (dot) dot.classList.add('is-selected');
+        }
+        el.addEventListener("click", function (e) {
+          e.stopPropagation();
+          closeFloatingPartnerCard();
+          if (typeof window.nwxSetDirectoryCountryFilter === "function") {
+            window.nwxSetDirectoryCountryFilter(country.name, region.name);
+          }
+          // The filter event re-renders the marker set. Open after that sync.
+          setTimeout(function () { openCountryPopup(country, region, null); }, 0);
+        });
+        var marker = new mapboxgl.Marker({ element: el, anchor: "center" })
+          .setLngLat(country.coordinates)
+          .addTo(map);
+        markers.push(marker);
+      });
+    });
+
+    markerLevel = "region+country";
+
+    if (animate !== false) {
+      if (regions.length === 1) {
+        map.flyTo({
+          center: regions[0].coordinates,
+          zoom: isMobile() ? REGION_ZOOM_MOBILE : REGION_ZOOM_DESKTOP,
+          speed: 1.1
+        });
+      } else if (regions.length > 1) {
+        var bounds = new mapboxgl.LngLatBounds();
+        regions.forEach(function (r) {
+          bounds.extend(r.coordinates);
+          (r.countries || []).forEach(function (c) { bounds.extend(c.coordinates); });
+        });
+        var mobile = isMobile();
+        map.fitBounds(bounds, {
+          padding: mobile ? { top: 150, bottom: 100, left: 34, right: 34 } : { top: 90, bottom: 60, left: 100, right: 110 },
+          duration: 900,
+          maxZoom: mobile ? 3.2 : 4.4
+        });
+      }
+    }
+
+    listTitle.textContent = regions.length === 1 ? (regions[0].name + " — Countries") : (regions.length + " Regions selected");
+    breadcrumb.innerHTML = '<span class="crumb-world" style="cursor:pointer;text-decoration:underline;">World</span>' +
+      ' / <span class="crumb-current">' + (regions.length === 1 ? regions[0].name : regions.length + " regions") + "</span>";
+    var worldCrumb = breadcrumb.querySelector(".crumb-world");
+    if (worldCrumb) worldCrumb.addEventListener("click", clearMapGeoFilters);
+
+    backBtn.classList.add("visible");
+    mobileBack.classList.add("visible");
+    if (regions.length === 1) {
+      renderContextStat(regions[0]);
+    } else {
+      mobileStats.innerHTML = mobilePill(sumField(regions, "uniqueAccounts"), regions.length + " regions accounts");
+    }
+    renderCountryList(regions);
+    setBrowseExpanded(true);
+  }
+
+  function drillIntoRegion(region) {
+    if (typeof window.nwxSetDirectoryRegionFilter === "function") {
+      window.nwxSetDirectoryRegionFilter(region.name);
+    } else {
+      renderMultiRegionContext([region], [], true);
+    }
+  }
+
+  // Lists every country across every currently-selected region (labeling
+  // with its region when more than one region is active, so rows stay
+  // unambiguous once regions are combined).
+  function renderCountryList(regions) {
+    regionList.innerHTML = "";
+    var multi = regions.length > 1;
+    regions.forEach(function (region) {
+      (region.countries || []).forEach(function (country) {
+        var row = document.createElement("div");
+        row.className = "region-row";
+        var label = multi ? (country.name + " — " + region.name) : country.name;
+        row.innerHTML =
+          '<span class="name">' + label + '</span><span class="count">' + country.uniqueAccounts + "</span>";
+        row.addEventListener("click", function () {
+          map.flyTo({ center: country.coordinates, zoom: isMobile() ? REGION_ZOOM_MOBILE + 0.6 : REGION_ZOOM_DESKTOP + 0.6 });
+        });
+        regionList.appendChild(row);
+      });
+    });
+  }
+
+  function clearMapGeoFilters() {
+    if (typeof window.nwxClearDirectoryGeoFilters === "function") window.nwxClearDirectoryGeoFilters();
+    else showWorldView();
+  }
+  backBtn.addEventListener("click", clearMapGeoFilters);
+  mobileBack.addEventListener("click", clearMapGeoFilters);
+
+  // ---------------- MARKER + POPUP BUILDERS ----------------
+
+  // World-view region marker: a compact chip with the region name always
+  // visible (no hover required) and the uniqueAccounts count in orange.
+  function buildRegionChipEl(region) {
+    var chip = document.createElement("div");
+    chip.className = "nwx-chip";
+    chip.setAttribute("role", "button");
+    chip.setAttribute("data-region-id", region.id);
+    chip.setAttribute("aria-label", region.name + ": " + region.uniqueAccounts + " unique accounts");
+
+    var nameEl = document.createElement("span");
+    nameEl.className = "chip-name";
+    nameEl.textContent = region.name;
+
+    var countEl = document.createElement("span");
+    countEl.className = "chip-count";
+    countEl.textContent = region.uniqueAccounts;
+
+    chip.appendChild(nameEl);
+    chip.appendChild(countEl);
+    return chip;
+  }
+
+  // Drill-down country marker: smaller compact circle, name available via
+  // hover/focus label and the popup title (geographic meaning is precise
+  // enough at this zoom that a always-on name chip isn't necessary).
+  function buildCountryMarkerEl(number, label) {
+    var wrap = document.createElement("div");
+    wrap.className = "nwx-marker-wrap";
+
+    var dot = document.createElement("div");
+    dot.className = "nwx-marker country-marker";
+    dot.textContent = number;
+    dot.setAttribute("role", "button");
+    dot.setAttribute("aria-label", label + ": " + number + " unique accounts");
+
+    var tag = document.createElement("div");
+    tag.className = "nwx-marker-label";
+    tag.textContent = label;
+
+    wrap.appendChild(dot);
+    wrap.appendChild(tag);
+    return wrap;
+  }
+
+  function popupEscapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function popupCategoryIconSrc(category) {
+    if (typeof window.nwxPartnerCategoryIconSrc === "function") {
+      return window.nwxPartnerCategoryIconSrc(category) || "";
+    }
+    return "";
+  }
+
+  function popupPartnersHTML(regionName, countryName) {
+    if (typeof window.nwxPartnerDirectoryForMapContext !== "function") return "";
+    var partners = window.nwxPartnerDirectoryForMapContext(regionName, countryName || "") || [];
+    if (!partners.length) {
+      return '<div class="nwx-popup-partners">' +
+        '<div class="nwx-popup-partners-title">Trusted Partners</div>' +
+        '<div class="nwx-popup-no-partners">No Trusted Partners match the current filters in this area.</div>' +
+        '</div>';
+    }
+
+    var cards = partners.map(function (p) {
+      var name = popupEscapeHtml(p.name || "");
+      var category = popupEscapeHtml(p.category || "");
+      var subs = Array.isArray(p.subcategories) ? p.subcategories.filter(Boolean).join(", ") : "";
+      var iconSrc = popupCategoryIconSrc(p.category);
+      var icon = iconSrc ? '<img class="nwx-popup-partner-icon" src="' + popupEscapeHtml(iconSrc) + '" alt="" aria-hidden="true">' : "";
+      var geo = [p.country || "", p.regionsDisplay || ""].filter(Boolean).join(" · ");
+      return '<div class="nwx-popup-partner-card" data-partner-id="' + popupEscapeHtml(p.__id) + '">' +
+        '<div class="nwx-popup-partner-card-head">' + icon +
+          '<div class="nwx-popup-partner-copy">' +
+            '<div class="nwx-popup-partner-name">' + name + '</div>' +
+            (category ? '<div class="nwx-popup-partner-category">' + category + '</div>' : '') +
+            (subs ? '<div class="nwx-popup-partner-sub">' + popupEscapeHtml(subs) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+        (geo ? '<div class="nwx-popup-partner-geo">' + popupEscapeHtml(geo) + '</div>' : '') +
+      '</div>';
+    }).join("");
+
+    return '<div class="nwx-popup-partners">' +
+      '<div class="nwx-popup-partners-head">' +
+        '<div class="nwx-popup-partners-title">Trusted Partners</div>' +
+        '<div class="nwx-popup-partner-count" data-carousel-count>1 / ' + partners.length + '</div>' +
+      '</div>' +
+      '<div class="nwx-popup-partner-viewport"><div class="nwx-popup-partner-track" data-carousel-track>' + cards + '</div></div>' +
+      (partners.length > 1 ? '<div class="nwx-popup-carousel-nav">' +
+        '<button class="nwx-popup-carousel-btn" type="button" data-carousel-prev aria-label="Previous partner">‹</button>' +
+        '<button class="nwx-popup-carousel-btn" type="button" data-carousel-next aria-label="Next partner">›</button>' +
+      '</div>' : '') +
+    '</div>';
+  }
+
+  function wirePopupPartnerCarousel(popupEl) {
+    if (!popupEl) return;
+    var track = popupEl.querySelector('[data-carousel-track]');
+    var count = popupEl.querySelector('[data-carousel-count]');
+    var cards = track ? Array.prototype.slice.call(track.querySelectorAll('.nwx-popup-partner-card')) : [];
+    if (track && cards.length) {
+      var updateCount = function () {
+        var width = track.clientWidth || 1;
+        var idx = Math.max(0, Math.min(cards.length - 1, Math.round(track.scrollLeft / width)));
+        if (count) count.textContent = (idx + 1) + ' / ' + cards.length;
+      };
+      track.addEventListener('scroll', updateCount, { passive: true });
+      var prev = popupEl.querySelector('[data-carousel-prev]');
+      var next = popupEl.querySelector('[data-carousel-next]');
+      if (prev) prev.addEventListener('click', function (e) { e.stopPropagation(); track.scrollBy({ left: -track.clientWidth, behavior: 'smooth' }); });
+      if (next) next.addEventListener('click', function (e) { e.stopPropagation(); track.scrollBy({ left: track.clientWidth, behavior: 'smooth' }); });
+    }
+    popupEl.querySelectorAll('.nwx-popup-partner-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (typeof window.nwxOpenPartnerPreviewById === 'function') {
+          window.nwxOpenPartnerPreviewById(card.getAttribute('data-partner-id'));
+        }
+      });
+    });
+  }
+
+  function popupHTML(opts) {
+    // opts: {title, sub (optional), headlineNum, headlineLabel, rows: [[k,v], ...], actionLabel, partnersHtml}
+    var rowsHtml = opts.rows.map(function (r) {
+      return '<div class="nwx-popup-row"><span class="k">' + r[0] + '</span><span class="v">' + r[1] + "</span></div>";
+    }).join("");
+
+    var actionHtml = opts.actionLabel
+      ? '<button class="nwx-popup-action" type="button" data-action="drill">' + opts.actionLabel + "</button>"
+      : "";
+
+    var subHtml = opts.sub ? '<div class="nwx-popup-sub">' + opts.sub + '</div>' : "";
+
+    return (
+      '<div class="nwx-popup-title">' + opts.title + '</div>' +
+      subHtml +
+      '<div class="nwx-popup-headline"><span class="n">' + opts.headlineNum + '</span><span class="l">' + opts.headlineLabel + '</span></div>' +
+      '<div class="nwx-popup-grid">' + rowsHtml + "</div>" +
+      (opts.partnersHtml || "") +
+      actionHtml
+    );
+  }
+
+  // Anchors to the region's real geographic coordinate (never a DOM/page
+  // offset) so the popup opens over the actual marker, not a top-left
+  // fallback. Also enforces the single-active-popup rule.
+  function openRegionPopup(region, anchorEl) {
+    closeActivePopup();
+
+    var html = popupHTML({
+      title: region.name,
+      sub: null,
+      headlineNum: region.uniqueAccounts,
+      headlineLabel: "Unique Accounts",
+      rows: [
+        ["Charterers", region.charterers],
+        ["Brokers", region.brokers],
+        ["Fleet Owners", region.fleetOwners],
+        ["Dual Accounts", region.dualAccounts]
+      ],
+      partnersHtml: popupPartnersHTML(region.name, ""),
+      actionLabel: null
+    });
+
+    var popup = new mapboxgl.Popup({ offset: 26, closeButton: true, maxWidth: "300px" })
+      .setLngLat(region.coordinates)
+      .setHTML(html)
+      .addTo(map);
+    popup.on("close", function () { if (activePopup === popup) activePopup = null; });
+    activePopup = popup;
+
+    var el = popup.getElement();
+    // A click inside the popup (including its own close button, which
+    // Mapbox wires internally) must not bubble to the map's background
+    // click-to-close handler.
+    el.addEventListener("click", function (e) { e.stopPropagation(); });
+    wirePopupPartnerCarousel(el);
+
+    var actionBtn = el.querySelector('[data-action="drill"]');
+    if (actionBtn) {
+      actionBtn.addEventListener("click", function () {
+        popup.remove();
+        drillIntoRegion(region);
+      });
+    }
+  }
+
+  // Anchors to the country's real geographic coordinate — same rule as
+  // the region popup above.
+  function openCountryPopup(country, region, anchorEl) {
+    closeActivePopup();
+
+    var html = popupHTML({
+      title: country.name,
+      sub: region.name,
+      headlineNum: country.uniqueAccounts,
+      headlineLabel: "Unique Accounts",
+      rows: [
+        ["Charterers", country.charterers],
+        ["Brokers", country.brokers],
+        ["Fleet Owners", country.fleetOwners],
+        ["Dual Accounts", country.dualAccounts]
+      ],
+      partnersHtml: popupPartnersHTML(region.name, country.name),
+      actionLabel: null
+    });
+
+    var popup = new mapboxgl.Popup({ offset: 22, closeButton: true, maxWidth: "300px" })
+      .setLngLat(country.coordinates)
+      .setHTML(html)
+      .addTo(map);
+    popup.on("close", function () { if (activePopup === popup) activePopup = null; });
+    activePopup = popup;
+
+    popup.getElement().addEventListener("click", function (e) { e.stopPropagation(); });
+    wirePopupPartnerCarousel(popup.getElement());
+  }
+
+
+  // Partner Directory filters are the source of truth for geographic map state.
+  // Reads the full arrays (not just the backward-compat singular region/
+  // country fields), so 2+ active Region filters keep every one of their
+  // pins on the map instead of collapsing back to World view (Priority 3).
+  window.addEventListener("nwxpartnerfilterschange", function (e) {
+    if (!coverage) return;
+    var detail = (e && e.detail) || {};
+    var regionNames = Array.isArray(detail.regions) ? detail.regions : (detail.region ? [detail.region] : []);
+    var countryNames = Array.isArray(detail.countries) ? detail.countries : (detail.country ? [detail.country] : []);
+
+    var regions = coverage.regions.filter(function (r) { return regionNames.indexOf(r.name) !== -1; });
+
+    if (!regions.length) {
+      showWorldView();
+      return;
+    }
+    renderMultiRegionContext(regions, countryNames, true);
+  });
+
+  // ---------------- RESPONSIVE RE-CENTER ----------------
+  // Region/country (drill-down) framing: unchanged from before — re-applies
+  // the appropriate fixed zoom for the current breakpoint on every resize.
+  // World view: re-fit is deliberately restricted to a desktop<->mobile
+  // breakpoint crossing (Task 1's "viewport meaningfully changes" trigger),
+  // not every resize event, since fitWorldView() already recomputes a
+  // fresh camera fit from the real region anchors.
+  window.addEventListener("resize", function () {
+    if (!coverage) return;
+    if (currentRegions.length) {
+      var targetZoom = isMobile() ? REGION_ZOOM_MOBILE : REGION_ZOOM_DESKTOP;
+      map.easeTo({ zoom: targetZoom, duration: 200 });
+      return;
+    }
+    var mobileNow = isMobile();
+    if (mobileNow !== _lastIsMobile) {
+      fitWorldView();
+      _lastIsMobile = mobileNow;
+    }
+  });
+
+})();
+</script>
+
+
+<script>
+(function () {
+  "use strict";
+
+  var allPartners = [];
+  var filters = { search: "", regions: [], countries: [], categories: [], subcategories: [] };
+  var selectedId = null;
+  // Full Nauticworx country list, source: data/partners.json's own
+  // options.countries block — the same authoritative reference list the
+  // live production Partner Program frontend uses to populate its own
+  // Country filter (confirmed in Nauticworx/Partner-Program's index.html,
+  // updateFeedOptions()/COUNTRY_OPTIONS_FALLBACK). Never regenerated from
+  // active partner records (Batch 3 correction, Task 2). NOTE: when a
+  // Region filter is active, the option list shown is narrowed to that
+  // Region's countries per the authoritative Region->Country mapping below
+  // (QA Priority 2) — see populateCountryOptions(); this array itself
+  // always stays the complete, unfiltered reference list.
+  var fullCountryList = [];
+
+  // ISO 3166-1 alpha-2 -> display name, used only to decode
+  // data/partners.json's options.regionCountries block (which stores
+  // country membership as ISO codes) into the same full-name strings used
+  // everywhere else in this feed (options.countries, partner.country).
+  // Standard ISO reference data, not CRM-derived or invented. Every name
+  // here was cross-checked to match an entry in options.countries verbatim
+  // (including diacritics/punctuation, e.g. "Côte d’Ivoire" with the
+  // curly apostrophe options.countries itself uses); "GF"/French Guiana has
+  // no matching options.countries entry and is intentionally left out of
+  // regionCountriesByName below rather than guessed.
+  var ISO_CODE_TO_COUNTRY_NAME = {
+    "AE": "United Arab Emirates", "AG": "Antigua and Barbuda", "AL": "Albania", "AO": "Angola",
+    "AR": "Argentina", "AU": "Australia", "AZ": "Azerbaijan", "BA": "Bosnia and Herzegovina",
+    "BB": "Barbados", "BD": "Bangladesh", "BE": "Belgium", "BG": "Bulgaria", "BH": "Bahrain",
+    "BJ": "Benin", "BN": "Brunei", "BR": "Brazil", "BS": "Bahamas", "BW": "Botswana", "BZ": "Belize",
+    "CA": "Canada", "CD": "Democratic Republic of the Congo", "CG": "Republic of the Congo",
+    "CI": "Côte d’Ivoire", "CL": "Chile", "CM": "Cameroon", "CN": "China", "CO": "Colombia",
+    "CR": "Costa Rica", "CU": "Cuba", "CV": "Cabo Verde", "CY": "Cyprus", "DE": "Germany",
+    "DJ": "Djibouti", "DK": "Denmark", "DM": "Dominica", "DO": "Dominican Republic", "DZ": "Algeria",
+    "EC": "Ecuador", "EE": "Estonia", "EG": "Egypt", "ES": "Spain", "FI": "Finland", "FJ": "Fiji",
+    "FM": "Micronesia", "FR": "France", "GA": "Gabon", "GB": "United Kingdom", "GD": "Grenada",
+    "GE": "Georgia", "GF": "French Guiana", "GH": "Ghana", "GM": "Gambia", "GQ": "Equatorial Guinea",
+    "GR": "Greece", "GT": "Guatemala", "GW": "Guinea-Bissau", "GY": "Guyana", "HK": "Hong Kong",
+    "HN": "Honduras", "HR": "Croatia", "HT": "Haiti", "ID": "Indonesia", "IE": "Ireland",
+    "IL": "Israel", "IN": "India", "IS": "Iceland", "IT": "Italy", "JM": "Jamaica", "JO": "Jordan",
+    "JP": "Japan", "KE": "Kenya", "KH": "Cambodia", "KI": "Kiribati", "KN": "Saint Kitts and Nevis",
+    "KR": "South Korea", "KW": "Kuwait", "KZ": "Kazakhstan", "LC": "Saint Lucia", "LK": "Sri Lanka",
+    "LR": "Liberia", "LT": "Lithuania", "LV": "Latvia", "LY": "Libya", "MA": "Morocco",
+    "ME": "Montenegro", "MG": "Madagascar", "MH": "Marshall Islands", "MM": "Myanmar", "MO": "Macau",
+    "MR": "Mauritania", "MT": "Malta", "MU": "Mauritius", "MV": "Maldives", "MX": "Mexico",
+    "MY": "Malaysia", "MZ": "Mozambique", "NA": "Namibia", "NG": "Nigeria", "NL": "Netherlands",
+    "NO": "Norway", "NR": "Nauru", "NZ": "New Zealand", "OM": "Oman", "PA": "Panama", "PE": "Peru",
+    "PG": "Papua New Guinea", "PH": "Philippines", "PK": "Pakistan", "PL": "Poland", "PT": "Portugal",
+    "PW": "Palau", "QA": "Qatar", "RO": "Romania", "SA": "Saudi Arabia", "SB": "Solomon Islands",
+    "SC": "Seychelles", "SE": "Sweden", "SG": "Singapore", "SI": "Slovenia", "SL": "Sierra Leone",
+    "SN": "Senegal", "SO": "Somalia", "SR": "Suriname", "ST": "São Tomé and Príncipe", "SV": "El Salvador",
+    "TG": "Togo", "TH": "Thailand", "TL": "Timor-Leste", "TM": "Turkmenistan", "TN": "Tunisia",
+    "TO": "Tonga", "TR": "Turkey", "TT": "Trinidad and Tobago", "TV": "Tuvalu", "TW": "Taiwan",
+    "TZ": "Tanzania", "US": "United States", "UY": "Uruguay", "VC": "Saint Vincent and the Grenadines",
+    "VE": "Venezuela", "VN": "Vietnam", "VU": "Vanuatu", "WS": "Samoa", "ZA": "South Africa"
+  };
+
+  // Authoritative Region -> Country-name membership (Priority 2), built from
+  // data/partners.json's own options.regionCountries block (ISO codes)
+  // decoded via ISO_CODE_TO_COUNTRY_NAME above, once partners.json loads.
+  // countryToRegionName is the reverse lookup used to auto-drop a Country
+  // filter whose Region is no longer active (Priority 2, rule 4).
+  var regionCountriesByName = {};
+  var countryToRegionName = {};
+  function buildRegionCountryMaps(regionCountriesRaw) {
+    regionCountriesByName = {};
+    countryToRegionName = {};
+    Object.keys(regionCountriesRaw || {}).forEach(function (regionName) {
+      var names = (regionCountriesRaw[regionName] || [])
+        .map(function (code) { return ISO_CODE_TO_COUNTRY_NAME[code]; })
+        .filter(Boolean);
+      regionCountriesByName[regionName] = uniqueSorted(names);
+      names.forEach(function (name) { countryToRegionName[name] = regionName; });
+    });
+  }
+
+  // Country <select> options, narrowed to the authoritative countries of
+  // whichever Region filter(s) are active (Priority 2, rules 1-3/6): the
+  // full list with no Region active, the union of each selected Region's
+  // countries otherwise. Never derived from active Partner records.
+  function populateCountryOptions() {
+    var countries = filters.regions.length
+      ? uniqueSorted(filters.regions.reduce(function (acc, r) { return acc.concat(regionCountriesByName[r] || []); }, []))
+      : fullCountryList;
+    fillSelect(countrySelect, countries, "Add Country");
+  }
+
+  // Drops any active Country filter that no longer belongs to any active
+  // Region filter (Priority 2, rule 4). When zero Regions remain active,
+  // all Country filters are cleared -- Country filters always require
+  // Region context.
+  function pruneCountriesOutsideActiveRegions() {
+    if (!filters.regions.length) {
+      // No Region remains active: Country filters always require Region
+      // context, so clear them entirely (the caller restores the full
+      // authoritative Country dropdown via populateCountryOptions()).
+      filters.countries = [];
+      return;
+    }
+    filters.countries = filters.countries.filter(function (name) {
+      var r = countryToRegionName[name];
+      return !r || filters.regions.indexOf(r) !== -1;
+    });
+  }
+  // Full Category list, same pattern as fullCountryList above: sourced from
+  // data/partners.json's own options.categories block (Batch 3/redesign,
+  // Task 7). Never regenerated from active partners.
+  var fullCategoryList = [];
+
+  // Category -> Subcategory taxonomy (redesign, Task 7), for populating the
+  // full authoritative Subcategory list (not just subcategories present on
+  // active partners), grouped by Category so the existing category-scoped
+  // UX is preserved. Transcribed from the Nauticworx Category | Subcategory
+  // reference table and cross-checked to match data/partners.json's own
+  // options.categories (11) and options.subcategories (82) sets exactly —
+  // this is a client-side grouping of the same authoritative taxonomy
+  // already shipped in partners.json, not a new/separate data source, and
+  // data/partners.json itself is not modified.
+  var CATEGORY_SUBCATEGORY_MAP = {
+    "Shipbuilding, Repair & Maintenance": ["Coating, Painting & Blasting","Dry Docking","Electrical & Automation","HVAC & Ventilation","Inspection, Survey & Certification","Mechanical & Engine Services","Ship Repair & Conversion","Steel, Hull & Structural Works"],
+    "Marine Equipment & Systems": ["Deck Machinery & Lifting Equipment","DP Systems","Mooring & Anchoring Systems","Navigation & Communication Systems","Power Generation & Energy Storage","Propulsion & Thrusters","Safety & Firefighting Equipment","Subsea & Offshore Equipment"],
+    "Spare Parts & Consumables": ["Electrical & Electronic Components","Engine & Machinery Spare Parts","Filters, Lubricants & Fluids","Hydraulic & Pneumatic Parts","Safety Equipment & PPE","Stores & Provisions","Tools & Workshop Equipment"],
+    "Logistics, Transport & Port Services": ["Crew Transport & Transfers","Customs, Clearance & Documentation","Freight Forwarding & Shipping","Port Logistics & Stevedoring","Road Transport & Heavy Lifting","Ship Agency Services","Vehicle Rental","Warehousing & Storage"],
+    "Offshore & Marine Support Services": ["Diving Services","Marine Coordination","Offshore & Maritime Security","Offshore Installation Support","Project Management","ROV & Inspection Services","Survey & Positioning"],
+    "Crew, Medical & Welfare Services": ["Accommodation & Hotels","Catering & Welfare Services","Crew Management & Manning","Emergency Response Services","Medical Care & Offshore Doctors","Recruitment & Training","Repatriation Services"],
+    "Legal, Insurance & Finance": ["Claims Handling","Contract & Commercial Consultancy","HSE & Safety Consultancy","Insurance & P&I Services","Maritime & Offshore Legal Services","Regulatory & Compliance Advisory","Risk Management","Ship Finance and Leasing"],
+    "Green Solutions & Sustainability": ["Alternative Fuels (LNG, Methanol, Hydrogen)","Decommissioning Solutions","Emission Reduction Technologies","Energy Efficiency Solutions","Environmental Monitoring","ESG & Carbon Reporting","Waste Management & Recycling"],
+    "Offshore Wind & Renewable Services": ["Cable Laying & Protection","Crew Transfer Vessels (CTV)","Foundations & Substructures","Inspection & Repair Services","Operations & Maintenance (O&M)","Service Operation Vessels (SOV)","Wind Farm Installation"],
+    "Shipyards & Newbuild Projects": ["Concept Design & Engineering","Dredging Vessel Construction","Newbuild Vessel Projects","Offshore Wind Newbuilds","Security & Patrol Vessel Programs","Series & Semi-Series Production","Specialized & Custom-Built Vessels","Turnkey Shipbuilding"],
+    "Technology, Digital & Innovation": ["Automation & AI","Cybersecurity","Data Analytics","Digital Twin Solutions","Fleet Management Systems","IoT & Remote Monitoring","Maritime Software"]
+  };
+
+  var railList = document.getElementById("partner-card-list");
+  var listGrid = document.getElementById("partner-list-grid");
+  var listView = document.getElementById("partner-list-view");
+  var resultCount = document.getElementById("partner-result-count");
+  var searchInputs = [document.getElementById("partner-search"), document.getElementById("partner-search-m")].filter(Boolean);
+  var regionSelect = document.getElementById("filter-region");
+  var countrySelect = document.getElementById("filter-country");
+  var categorySelect = document.getElementById("filter-category");
+  var subcategorySelect = document.getElementById("filter-subcategory");
+  var filterSelectedEls = {
+    region: document.getElementById("filter-region-selected"),
+    country: document.getElementById("filter-country-selected"),
+    category: document.getElementById("filter-category-selected"),
+    subcategory: document.getElementById("filter-subcategory-selected")
+  };
+  var profileCard = document.getElementById("partner-profile-card");
+  var previewOverlay = document.getElementById("partner-preview-overlay");
+
+  function partnerRegions(p) {
+    return Array.isArray(p.regions) && p.regions.length ? p.regions : (p.region ? [p.region] : []);
+  }
+  function partnerSubcats(p) {
+    return Array.isArray(p.subcategories) ? p.subcategories.filter(Boolean) : [];
+  }
+  function isPremier(p) {
+    return String(p.tier || "").toLowerCase().indexOf("premier") !== -1;
+  }
+
+  function uniqueSorted(arr) {
+    var seen = {}, out = [];
+    arr.forEach(function (v) {
+      if (!v || seen[v]) return;
+      seen[v] = true;
+      out.push(v);
+    });
+    return out.sort(function (a, b) { return a.localeCompare(b); });
+  }
+
+  // ---- filter option lists — derived from actual partner records, so
+  // every option shown always matches at least one real partner (Task 3). ----
+  function populateStaticFilterOptions() {
+    var regions = uniqueSorted(allPartners.reduce(function (acc, p) { return acc.concat(partnerRegions(p)); }, []));
+    fillSelect(regionSelect, regions, "Add Region");
+    // Country: the full authoritative Nauticworx country list, narrowed to
+    // the active Region filter(s) via the authoritative Region->Country
+    // mapping when one or more Regions are selected (Priority 2). Never
+    // derived from/narrowed by active partners or search — only by Region.
+    populateCountryOptions();
+    // Category: full authoritative list (redesign, Task 7) — same pattern
+    // as Country above, never narrowed to categories present on active
+    // partners.
+    fillSelect(categorySelect, fullCategoryList, "Add Category");
+    populateSubcategoryOptions();
+  }
+
+  // Subcategory (redesign, Task 7): full authoritative list via
+  // CATEGORY_SUBCATEGORY_MAP, not derived from active partners. All
+  // subcategories when no Category is selected; that Category's
+  // subcategories (from the map) when one is.
+  function populateSubcategoryOptions() {
+    var subcats = filters.categories.length
+      ? uniqueSorted(filters.categories.reduce(function (acc, c) { return acc.concat(CATEGORY_SUBCATEGORY_MAP[c] || []); }, []))
+      : uniqueSorted(fullCategoryList.reduce(function (acc, c) { return acc.concat(CATEGORY_SUBCATEGORY_MAP[c] || []); }, []));
+
+    // If one or more categories remain selected, discard only subcategory
+    // selections that no longer belong to any selected category. When no
+    // categories are selected, the full taxonomy is available and existing
+    // subcategory selections remain valid.
+    if (filters.categories.length) {
+      filters.subcategories = filters.subcategories.filter(function (v) { return subcats.indexOf(v) !== -1; });
+    }
+
+    fillSelect(subcategorySelect, subcats, "Add Subcategory");
+    subcategorySelect.value = "";
+    subcategorySelect.disabled = subcats.length === 0;
+  }
+
+  function fillSelect(select, values, allLabel) {
+    var current = select.value;
+    select.innerHTML = "";
+    var allOpt = document.createElement("option");
+    allOpt.value = "";
+    allOpt.textContent = allLabel;
+    select.appendChild(allOpt);
+    values.forEach(function (v) {
+      var opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    });
+    if (values.indexOf(current) !== -1) select.value = current;
+  }
+
+  function filterArrayForKey(key) {
+    if (key === "region") return filters.regions;
+    if (key === "country") return filters.countries;
+    if (key === "category") return filters.categories;
+    if (key === "subcategory") return filters.subcategories;
+    return [];
+  }
+
+  function removeFilterValue(key, label) {
+    var arr = filterArrayForKey(key);
+    var idx = arr.indexOf(label);
+    if (idx !== -1) arr.splice(idx, 1);
+
+    if (key === "region") {
+      // Countries belonging to a removed region cannot remain active
+      // (Priority 2, rule 4), and the Country option list is restored to
+      // the full authoritative list once no Region remains (rule 5).
+      pruneCountriesOutsideActiveRegions();
+      populateCountryOptions();
+    }
+    if (key === "category") populateSubcategoryOptions();
+    renderAll();
+  }
+
+  function renderSelectedFilterChipsForKey(key) {
+    var container = filterSelectedEls[key];
+    if (!container) return;
+    container.innerHTML = "";
+    filterArrayForKey(key).forEach(function (label) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "filter-chip";
+      chip.setAttribute("aria-label", "Remove " + key + " filter: " + label);
+      chip.innerHTML = '<span>' + escapeHtml(label) + '</span><span class="filter-chip-x" aria-hidden="true">×</span>';
+      chip.addEventListener("click", function () { removeFilterValue(key, label); });
+      container.appendChild(chip);
+    });
+  }
+
+  function renderSelectedFilterChips() {
+    renderSelectedFilterChipsForKey("region");
+    renderSelectedFilterChipsForKey("country");
+    renderSelectedFilterChipsForKey("category");
+    renderSelectedFilterChipsForKey("subcategory");
+  }
+
+  // ---- filtering (Task 3): search + all four filters combine (AND) ----
+  function getFilteredPartners() {
+    var q = filters.search.trim().toLowerCase();
+    return allPartners.filter(function (p) {
+      if (filters.regions.length && !partnerRegions(p).some(function (v) { return filters.regions.indexOf(v) !== -1; })) return false;
+      if (filters.countries.length && filters.countries.indexOf(p.country) === -1) return false;
+      if (filters.categories.length && filters.categories.indexOf(p.category) === -1) return false;
+      if (filters.subcategories.length && !partnerSubcats(p).some(function (v) { return filters.subcategories.indexOf(v) !== -1; })) return false;
+      if (q) {
+        var haystack = [
+          p.name || "",
+          p.category || "",
+          partnerSubcats(p).join(" "),
+          p.country || "",
+          partnerRegions(p).join(" ")
+        ].join(" ").toLowerCase();
+        if (haystack.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  // ---- icon helpers (redesign pass) — inline SVG, matching the approved
+  // mockups' glyph set, replacing the PNG assets (globe.png,
+  // partner-contact-name.png, visit-partner.PNG) that were failing to
+  // render. No new asset files; icons are pure inline markup + CSS. ----
+  var ICON_GEO = '<svg class="pc-icon-geo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"></path></svg>';
+  var ICON_CONTACT = '<svg class="pc-icon-contact" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c.8-4.2 3.5-6 8-6s7.2 1.8 8 6"></path></svg>';
+  var ICON_WEBSITE = '<svg class="pc-icon-website" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M10 14 20 4"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"></path></svg>';
+  var ICON_CHEVRON = '<svg class="mc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>';
+  var CATEGORY_ICON_FILES = {
+    "Crew, Medical & Welfare Services": "Crew, Medical & Welfare Services.png",
+    "Green Solutions & Sustainability": "Green Solutions & Sustainability.png",
+    "Legal, Insurance & Finance": "Legal, Insurance & Finance.png",
+    "Logistics, Transport & Port Services": "Logistics, Transport & Port Services.png",
+    "Marine Equipment & Systems": "Marine Equipment & Systems.png",
+    "Offshore & Marine Support Services": "Offshore & Marine Support Services.png",
+    "Offshore Wind & Renewable Services": "Offshore Wind & Renewable Services.png",
+    "Shipbuilding, Repair & Maintenance": "Shipbuilding, Repair & Maintenance.png",
+    "Shipyards & Newbuild Projects": "Shipyards & Newbuild Projects.png",
+    "Spare Parts & Consumables": "Spare Parts & Consumables.png",
+    "Technology, Digital & Innovation": "Technology, Digital & Innovation.png"
+  };
+
+  function categoryIconHTML(p, cssClass) {
+    var fileName = CATEGORY_ICON_FILES[p.category];
+    if (!fileName) return "";
+    return '<img class="' + cssClass + '" src="assets/' +
+      encodeURIComponent(fileName).replace(/%2F/g, "/") +
+      '" alt="" aria-hidden="true">';
+  }
+
+
+  function contactLineHTML(p) {
+    if (!p.contactName && !p.contactTitle) return "";
+    return '<div class="pc-contact">' + ICON_CONTACT +
+      '<span>' + escapeHtml([p.contactName, p.contactTitle].filter(Boolean).join(" · ")) + "</span></div>";
+  }
+  function actionsHTML(p) {
+    var contactHref = p.contactUrl ? escapeAttr(p.contactUrl) : "";
+    var websiteHref = p.websiteUrl ? escapeAttr(p.websiteUrl) : "";
+    if (!contactHref && !websiteHref) return "";
+    return '<div class="pc-actions">' +
+      (contactHref ? '<a class="pc-btn" href="' + contactHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.contactCtaLabel || "Contact Partner") + "</a>" : "") +
+      (websiteHref ? '<a class="pc-btn pc-btn-primary" href="' + websiteHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE + "</a>" : "") +
+      "</div>";
+  }
+  function geoLineHTML(p) {
+    var regions = partnerRegions(p);
+    var regionsLabel = p.regionsDisplay || regions.join(", ");
+    var text = [p.country, regionsLabel].filter(Boolean).join(" · ");
+    if (!text) return "";
+    return '<div class="pc-meta-row has-icon">' + ICON_GEO + "<span>" + escapeHtml(text) + "</span></div>";
+  }
+
+  // Partner name: link to partnerPageUrl, same tab, when present; plain
+  // text when missing (Task 5). Used by both the full grid card and the
+  // floating/preview panels. stopPropagation so clicking the name link
+  // navigates instead of also triggering the card's own click handler.
+  function nameHTML(p, cssClass) {
+    var text = escapeHtml(p.name);
+    if (p.partnerPageUrl) {
+      return '<a class="' + cssClass + '" href="' + escapeAttr(p.partnerPageUrl) + '" onclick="event.stopPropagation()">' + text + "</a>";
+    }
+    return '<span class="' + cssClass + '">' + text + "</span>";
+  }
+
+  // ---- full card rendering (List-mode grid only — Task 3/4). Approved
+  // field order: name -> category -> subcategories -> contact name/title ->
+  // Contact Partner button -> Visit Website button -> Country/Regions last.
+  function cardHTML(p) {
+    var subs = partnerSubcats(p);
+    return (
+      '<div class="pc-heading">' +
+        categoryIconHTML(p, "pc-category-icon") +
+        '<div class="pc-heading-copy">' +
+          '<div class="pc-top">' + nameHTML(p, "pc-name") + "</div>" +
+          '<div class="pc-cat">' + escapeHtml(p.category || "") + "</div>" +
+        "</div>" +
+        (isPremier(p) ? '<span class="pc-premier">Premier</span>' : "") +
+      "</div>" +
+      (subs.length ? '<div class="pc-sub">' + escapeHtml(subs.join(", ")) + "</div>" : "") +
+      contactLineHTML(p) +
+      actionsHTML(p) +
+      geoLineHTML(p)
+    );
+  }
+
+  function buildCardEl(p) {
+    var el = document.createElement("div");
+    el.className = "partner-card" + (p.__id === selectedId ? " selected" : "");
+    el.setAttribute("data-partner-id", p.__id);
+    el.innerHTML = cardHTML(p);
+    // Grid cards open the full Preview Overlay directly (Task 6).
+    el.addEventListener("click", function () { openPreviewOverlay(p); });
+    return el;
+  }
+
+  // ---- compact sidebar entries only (Task 1/3) — name + category, no
+  // contact/actions/geo, so the rail never duplicates the full card. ----
+  function compactCardHTML(p) {
+    return (
+      categoryIconHTML(p, "mc-category-icon") +
+      '<div class="mc-text">' + nameHTML(p, "mc-name") +
+      '<div class="mc-meta">' + escapeHtml(p.category || "") + "</div></div>" +
+      ICON_CHEVRON
+    );
+  }
+
+  function buildCompactCardEl(p) {
+    var el = document.createElement("div");
+    el.className = "mini-card" + (p.__id === selectedId ? " selected" : "");
+    el.setAttribute("data-partner-id", p.__id);
+    el.innerHTML = compactCardHTML(p);
+    // Sidebar entries show the compact floating panel (Task 2).
+    el.addEventListener("click", function (e) { e.stopPropagation(); selectPartner(p); });
+    return el;
+  }
+
+  function renderInto(container, list, emptyMsg, builder) {
+    container.innerHTML = "";
+    if (!list.length) {
+      var empty = document.createElement("div");
+      empty.className = "partner-empty-state pd-no-results";
+      empty.innerHTML = '<div class="t1">No partners found</div><div>' + escapeHtml(emptyMsg) + "</div>";
+      container.appendChild(empty);
+      return;
+    }
+    list.forEach(function (p) { container.appendChild(builder(p)); });
+  }
+
+  function renderAll() {
+    var filtered = getFilteredPartners();
+    renderSelectedFilterChips();
+    renderInto(railList, filtered, "Try adjusting search or filters.", buildCompactCardEl);
+    renderInto(listGrid, filtered, "Try adjusting search or filters.", buildCardEl);
+    resultCount.textContent = filtered.length + (filtered.length === 1 ? " partner" : " partners") + " found";
+    dispatchPartnerFilterState();
+  }
+  // Read-only bridge used by the Network Coverage region popup. It keeps
+  // the two datasets separate while allowing a region popup to list matching
+  // Partner Directory companies beneath the account summary.
+  window.nwxPartnerDirectoryForMapContext = function (regionName, countryName) {
+    return getFilteredPartners().filter(function (p) {
+      if (regionName && partnerRegions(p).indexOf(regionName) === -1) return false;
+      if (countryName && p.country !== countryName) return false;
+      return true;
+    }).sort(function (a, b) {
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+  };
+
+  window.nwxPartnerCategoryIconSrc = function (category) {
+    var fileName = CATEGORY_ICON_FILES[category];
+    return fileName ? ("assets/" + encodeURIComponent(fileName).replace(/%2F/g, "/")) : "";
+  };
+
+  window.nwxOpenPartnerPreviewById = function (partnerId) {
+    var id = String(partnerId);
+    var partner = allPartners.find(function (p) { return String(p.__id) === id; });
+    if (partner) openPreviewOverlay(partner);
+  };
+
+  function dispatchPartnerFilterState() {
+    window.dispatchEvent(new CustomEvent("nwxpartnerfilterschange", {
+      detail: {
+        regions: filters.regions.slice(),
+        countries: filters.countries.slice(),
+        // Backward-compatible singular values for any older listener.
+        region: filters.regions.length === 1 ? filters.regions[0] : "",
+        country: filters.countries.length === 1 ? filters.countries[0] : ""
+      }
+    }));
+  }
+
+  function addUniqueFilterValue(arr, value) {
+    if (value && arr.indexOf(value) === -1) arr.push(value);
+  }
+
+  // Map clicks add geographic filters rather than replacing existing ones.
+  window.nwxSetDirectoryRegionFilter = function (regionName) {
+    if (!regionName) {
+      filters.regions = [];
+      filters.countries = [];
+    } else {
+      addUniqueFilterValue(filters.regions, regionName);
+    }
+    regionSelect.value = "";
+    countrySelect.value = "";
+    populateCountryOptions();
+    renderAll();
+  };
+
+  // Single entry point for "select a Country" (dropdown or map pin): adds
+  // the Country, then resolves its Region from the authoritative
+  // Region->Country mapping (countryToRegionName) and adds that Region too
+  // if it isn't already active — Region selections already active are left
+  // untouched (addUniqueFilterValue no-ops on a duplicate, so no duplicate
+  // chip is possible). regionNameHint is a fallback only for a Country the
+  // authoritative mapping doesn't cover (e.g. one not in
+  // options.regionCountries), so a map click still ends up in the right
+  // Region context.
+  function applyCountryFilter(countryName, regionNameHint) {
+    var regionName = (countryName && countryToRegionName[countryName]) || regionNameHint || "";
+    if (regionName) addUniqueFilterValue(filters.regions, regionName);
+    if (countryName) addUniqueFilterValue(filters.countries, countryName);
+    regionSelect.value = "";
+    countrySelect.value = "";
+    populateCountryOptions();
+    renderAll();
+  }
+
+  window.nwxSetDirectoryCountryFilter = function (countryName, regionName) {
+    applyCountryFilter(countryName, regionName);
+  };
+
+  window.nwxClearDirectoryGeoFilters = function () {
+    filters.regions = [];
+    filters.countries = [];
+    regionSelect.value = "";
+    countrySelect.value = "";
+    populateCountryOptions();
+    renderAll();
+  };
+
+  function syncSelectedHighlight() {
+    document.querySelectorAll(".partner-card, .mini-card").forEach(function (el) {
+      el.classList.toggle("selected", el.getAttribute("data-partner-id") === String(selectedId));
+    });
+  }
+
+  // ---- floating panel / drawer (Task 2) — compact preview shown over the
+  // map when a partner is selected from the sidebar. Full detail lives in
+  // the Preview Overlay (Task 6), reached via "View full profile" below. ----
+  function selectPartner(p) {
+    selectedId = p.__id;
+    syncSelectedHighlight();
+
+    document.getElementById("ppc-name-wrap").innerHTML = nameHTML(p, "ppc-name");
+    var subs = partnerSubcats(p);
+    var subBits = [p.category].concat(subs.length ? [subs.join(", ")] : []).filter(Boolean);
+    document.getElementById("ppc-sub").textContent = subBits.join(" · ");
+
+    document.getElementById("ppc-contact-line").innerHTML = contactLineHTML(p);
+
+    var contactBtn = document.getElementById("ppc-contact-btn");
+    if (p.contactUrl) {
+      contactBtn.href = p.contactUrl;
+      contactBtn.innerHTML = escapeHtml(p.contactCtaLabel || "Contact Partner");
+      contactBtn.style.display = "";
+    } else {
+      contactBtn.style.display = "none";
+    }
+
+    var websiteBtn = document.getElementById("ppc-website-btn");
+    if (p.websiteUrl) {
+      websiteBtn.href = p.websiteUrl;
+      websiteBtn.innerHTML = escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE;
+      websiteBtn.style.display = "";
+    } else {
+      websiteBtn.style.display = "none";
+    }
+
+    document.getElementById("ppc-geo-line").innerHTML = geoLineHTML(p);
+
+    document.getElementById("ppc-more").onclick = function () { openPreviewOverlay(p); };
+
+    profileCard.classList.add("visible");
+  }
+
+  function closePartnerProfileCard() {
+    profileCard.classList.remove("visible");
+    selectedId = null;
+    syncSelectedHighlight();
+  }
+
+  // Bridge for the Network Coverage script: its region/country marker click
+  // handlers call e.stopPropagation() (needed to guard against Mapbox's own
+  // map-click-to-close-popup handler), which also blocks the document-level
+  // click-away listener below from ever seeing those clicks bubble up. That
+  // silently left the floating partner card open after clicking a map pin
+  // (Priority 5 — "selected/floating partner card conflicts"). Exposing an
+  // explicit close call lets those handlers dismiss it themselves.
+  window.nwxClosePartnerProfileCard = closePartnerProfileCard;
+
+  var closeBtn = document.getElementById("ppc-close");
+  if (closeBtn) closeBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    closePartnerProfileCard();
+  });
+
+  // Dismiss the floating partner card when the user clicks anywhere outside
+  // the card or its sidebar selector. This prevents a selection from feeling
+  // persistent while the user returns to the map.
+  document.addEventListener("click", function (e) {
+    if (!profileCard.classList.contains("visible")) return;
+    if (profileCard.contains(e.target)) return;
+    if (e.target.closest && e.target.closest(".mini-card")) return;
+    closePartnerProfileCard();
+  });
+
+  // ---- Partner Preview Overlay (Task 6) — data-driven profile, no iframe
+  // (WordPress blocks embedding the live page). Includes every field the
+  // approved mockup calls for: name, category, subcategories, contact
+  // name/title, country, regions, description/testimonial when present,
+  // Contact Partner, Visit Website, Open Full Partner Page. Opening/
+  // closing this never mutates filters, search, view mode, or the
+  // selected-partner state underneath it — that state is untouched here. ----
+  function openPreviewOverlay(p) {
+    document.getElementById("ppo-name-wrap").innerHTML = nameHTML(p, "ppo-title-link ppo-title-plain");
+
+    var openFullBtn = document.getElementById("ppo-open-full");
+    if (p.partnerPageUrl) {
+      openFullBtn.href = p.partnerPageUrl;
+      openFullBtn.style.display = "";
+    } else {
+      openFullBtn.style.display = "none";
+    }
+
+    document.getElementById("ppo-category").textContent = p.category || "";
+    var subs = partnerSubcats(p);
+    document.getElementById("ppo-subcats").textContent = subs.join(", ");
+
+    document.getElementById("ppo-contact-row").innerHTML = (p.contactName || p.contactTitle)
+      ? ICON_CONTACT + "<span>" + escapeHtml([p.contactName, p.contactTitle].filter(Boolean).join(" · ")) + "</span>"
+      : "";
+
+    var regions = partnerRegions(p);
+    var regionsLabel = p.regionsDisplay || regions.join(", ");
+    var geoText = [p.country, regionsLabel].filter(Boolean).join(" · ");
+    document.getElementById("ppo-geo-row").innerHTML = geoText
+      ? ICON_GEO + "<span>" + escapeHtml(geoText) + "</span>"
+      : "";
+
+    var descEl = document.getElementById("ppo-desc");
+    if (p.description) { descEl.textContent = p.description; descEl.style.display = ""; }
+    else { descEl.style.display = "none"; }
+
+    var testimonialEl = document.getElementById("ppo-testimonial");
+    if (p.testimonial) { testimonialEl.textContent = '"' + p.testimonial + '"'; testimonialEl.style.display = ""; }
+    else { testimonialEl.style.display = "none"; }
+
+    document.getElementById("ppo-actions").innerHTML = actionsHTML(p);
+
+    previewOverlay.classList.add("visible");
+    previewOverlay.setAttribute("aria-hidden", "false");
+  }
+
+  function closePreviewOverlay() {
+    previewOverlay.classList.remove("visible");
+    previewOverlay.setAttribute("aria-hidden", "true");
+    // Deliberately does not touch filters, search, view mode, selectedId,
+    // or the floating panel — closing the preview restores exactly the
+    // map/list/filter/search state the user had before opening it.
+  }
+  document.getElementById("ppo-close").addEventListener("click", closePreviewOverlay);
+  document.getElementById("ppo-backdrop").addEventListener("click", closePreviewOverlay);
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && previewOverlay.classList.contains("visible")) closePreviewOverlay();
+  });
+
+  // ---- Map/List toggle coexistence (Task 5) — listens for the event the
+  // Network Coverage script dispatches; never touches the map itself. ----
+  window.addEventListener("nwxviewmode", function (e) {
+    listView.classList.toggle("visible", e.detail && e.detail.mode === "list");
+    closePartnerProfileCard();
+  });
+
+  // ---- search + filter wiring (Task 3) ----
+  searchInputs.forEach(function (input) {
+    input.addEventListener("input", function () {
+      filters.search = input.value || "";
+      searchInputs.forEach(function (other) { if (other !== input) other.value = filters.search; });
+      renderAll();
+    });
+  });
+  regionSelect.addEventListener("change", function () {
+    addUniqueFilterValue(filters.regions, regionSelect.value);
+    regionSelect.value = "";
+    populateCountryOptions();
+    renderAll();
+  });
+  countrySelect.addEventListener("change", function () {
+    applyCountryFilter(countrySelect.value);
+  });
+  categorySelect.addEventListener("change", function () {
+    addUniqueFilterValue(filters.categories, categorySelect.value);
+    categorySelect.value = "";
+    populateSubcategoryOptions();
+    renderAll();
+  });
+  subcategorySelect.addEventListener("change", function () {
+    addUniqueFilterValue(filters.subcategories, subcategorySelect.value);
+    subcategorySelect.value = "";
+    renderAll();
+  });
+
+  // Global "Reset all filters" control (matches the current live Partner
+  // Program's control/behavior). Clears every filter dimension this script
+  // owns, then delegates the geo/map/render reset to the existing
+  // nwxClearDirectoryGeoFilters() bridge rather than duplicating its logic
+  // -- that function already clears filters.regions/countries, restores the
+  // full Country dropdown, calls renderAll(), and (via the
+  // nwxpartnerfilterschange event the Network Coverage script listens for)
+  // resets the map to World view and closes any open region/country popup.
+  // Map/List mode is untouched, since nothing here touches the view toggle.
+  var resetAllButton = document.getElementById("filter-reset-all");
+  if (resetAllButton) {
+    resetAllButton.addEventListener("click", function () {
+      filters.search = "";
+      searchInputs.forEach(function (input) { input.value = ""; });
+      filters.categories = [];
+      filters.subcategories = [];
+      populateSubcategoryOptions();
+      closePartnerProfileCard();
+      window.nwxClearDirectoryGeoFilters();
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  fetch("data/partners.json")
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function (json) {
+      allPartners = (json.partners || []).filter(function (p) { return p && p.name && p.country && (p.region || (p.regions && p.regions.length)); });
+      allPartners.forEach(function (p, i) { p.__id = i; });
+      // Full country list source: data/partners.json's own options.countries
+      // block (the same authoritative list production's own Country filter
+      // uses). Falls back to partner-derived countries only if that block
+      // is ever missing, so the filter never renders empty.
+      var optionCountries = (json.options && Array.isArray(json.options.countries)) ? json.options.countries : [];
+      fullCountryList = optionCountries.length
+        ? uniqueSorted(optionCountries)
+        : uniqueSorted(allPartners.map(function (p) { return p.country; }));
+      // Category (redesign, Task 7): same source/fallback pattern as
+      // Country above — data/partners.json's options.categories block,
+      // falling back to active-partner categories only if that block is
+      // ever missing.
+      var optionCategories = (json.options && Array.isArray(json.options.categories)) ? json.options.categories : [];
+      fullCategoryList = optionCategories.length
+        ? uniqueSorted(optionCategories)
+        : uniqueSorted(allPartners.map(function (p) { return p.category; }));
+      // Authoritative Region->Country membership (Priority 2), source:
+      // options.regionCountries (ISO codes), decoded to the same full-name
+      // strings fullCountryList/partner.country use.
+      buildRegionCountryMaps(json.options && json.options.regionCountries);
+      populateStaticFilterOptions();
+      renderAll();
+    })
+    .catch(function (err) {
+      console.error("Failed to load Partner Directory (data/partners.json):", err);
+      resultCount.textContent = "Partner Directory failed to load";
+      renderInto(railList, [], "Could not load the Partner Directory feed.");
+      renderInto(listGrid, [], "Could not load the Partner Directory feed.");
+    });
+
+})();
+</script>
+
+</body>
+</html>
