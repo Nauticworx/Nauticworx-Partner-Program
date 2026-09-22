@@ -8,6 +8,37 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
 
+<!-- Partner Program analytics: preserves the existing GA4 event model and
+     relays events to the Nauticworx WordPress parent when embedded. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LG8CBXS558"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-LG8CBXS558");
+
+  window.nwxTrackEvent = function (name, params) {
+    var payload = params || {};
+    if (window.self !== window.top) {
+      try {
+        window.parent.postMessage({ type: "partner_event", event: name, params: payload }, "https://www.nauticworx.com");
+      } catch (e) {}
+      return;
+    }
+    if (typeof window.gtag !== "function") return;
+    window.gtag("event", name, payload);
+  };
+
+  window.nwxTrackPartnerImpression = function (partner, source) {
+    if (!partner || !partner.name) return;
+    window.nwxTrackEvent("partner_impression", {
+      partner_name: partner.name,
+      partner_page_url: partner.partnerPageUrl || "",
+      source: source || ""
+    });
+  };
+</script>
+
 <style>
   :root {
     --nwx-navy: #021229;
@@ -1357,8 +1388,8 @@
   </div>
 
   <!-- Global filter reset -- same control, icon, and behavior as the
-       current live Partner Program ("Reset all filters" / map_reset_filters),
-       positioned directly after the last filter field. -->
+       current live Partner Program, positioned directly after the last filter field.
+       Reset behavior is intentionally not tracked as an analytics event. -->
   <div class="nwx-clear-filters-wrap">
     <button class="nwx-clear-filters-button" type="button" id="filter-reset-all" aria-label="Reset all filters" title="Reset all filters">
       <svg class="nwx-reset-filter-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -1811,6 +1842,15 @@
       el.addEventListener("click", function (e) {
         e.stopPropagation();
         closeFloatingPartnerCard();
+        if (typeof window.nwxTrackEvent === "function") {
+          var regionPartners = (typeof window.nwxPartnerDirectoryForMapContext === "function")
+            ? window.nwxPartnerDirectoryForMapContext(region.name, "") : [];
+          window.nwxTrackEvent("map_pin_click", {
+            pin_label: region.name,
+            pin_type: "region",
+            has_partners: !!(regionPartners && regionPartners.length)
+          });
+        }
         if (typeof window.nwxSetDirectoryRegionFilter === "function") {
           window.nwxSetDirectoryRegionFilter(region.name);
           setTimeout(function () { openRegionPopup(region, null); }, 0);
@@ -1875,6 +1915,15 @@
       regionEl.addEventListener("click", function (e) {
         e.stopPropagation();
         closeFloatingPartnerCard();
+        if (typeof window.nwxTrackEvent === "function") {
+          var regionPartners = (typeof window.nwxPartnerDirectoryForMapContext === "function")
+            ? window.nwxPartnerDirectoryForMapContext(region.name, "") : [];
+          window.nwxTrackEvent("map_pin_click", {
+            pin_label: region.name,
+            pin_type: "region",
+            has_partners: !!(regionPartners && regionPartners.length)
+          });
+        }
         openRegionPopup(region, regionEl);
       });
       var regionMarker = new mapboxgl.Marker({
@@ -1893,6 +1942,16 @@
         el.addEventListener("click", function (e) {
           e.stopPropagation();
           closeFloatingPartnerCard();
+          if (typeof window.nwxTrackEvent === "function") {
+            var countryPartners = (typeof window.nwxPartnerDirectoryForMapContext === "function")
+              ? window.nwxPartnerDirectoryForMapContext(region.name, country.name) : [];
+            window.nwxTrackEvent("map_pin_click", {
+              pin_label: country.name,
+              pin_type: "country",
+              region_name: region.name,
+              has_partners: !!(countryPartners && countryPartners.length)
+            });
+          }
           if (typeof window.nwxSetDirectoryCountryFilter === "function") {
             window.nwxSetDirectoryCountryFilter(country.name, region.name);
           }
@@ -2084,7 +2143,7 @@
     '</div>';
   }
 
-  function wirePopupPartnerCarousel(popupEl) {
+  function wirePopupPartnerCarousel(popupEl, source) {
     if (!popupEl) return;
     var track = popupEl.querySelector('[data-carousel-track]');
     var count = popupEl.querySelector('[data-carousel-count]');
@@ -2105,7 +2164,7 @@
       card.addEventListener('click', function (e) {
         e.stopPropagation();
         if (typeof window.nwxOpenPartnerPreviewById === 'function') {
-          window.nwxOpenPartnerPreviewById(card.getAttribute('data-partner-id'));
+          window.nwxOpenPartnerPreviewById(card.getAttribute('data-partner-id'), source || '');
         }
       });
     });
@@ -2166,7 +2225,12 @@
     // Mapbox wires internally) must not bubble to the map's background
     // click-to-close handler.
     el.addEventListener("click", function (e) { e.stopPropagation(); });
-    wirePopupPartnerCarousel(el);
+    wirePopupPartnerCarousel(el, "region_popup");
+    if (typeof window.nwxPartnerDirectoryForMapContext === "function" && typeof window.nwxTrackPartnerImpression === "function") {
+      (window.nwxPartnerDirectoryForMapContext(region.name, "") || []).forEach(function (partner) {
+        window.nwxTrackPartnerImpression(partner, "region_popup");
+      });
+    }
 
     var actionBtn = el.querySelector('[data-action="drill"]');
     if (actionBtn) {
@@ -2205,7 +2269,12 @@
     activePopup = popup;
 
     popup.getElement().addEventListener("click", function (e) { e.stopPropagation(); });
-    wirePopupPartnerCarousel(popup.getElement());
+    wirePopupPartnerCarousel(popup.getElement(), "country_popup");
+    if (typeof window.nwxPartnerDirectoryForMapContext === "function" && typeof window.nwxTrackPartnerImpression === "function") {
+      (window.nwxPartnerDirectoryForMapContext(region.name, country.name) || []).forEach(function (partner) {
+        window.nwxTrackPartnerImpression(partner, "country_popup");
+      });
+    }
   }
 
 
@@ -2260,6 +2329,9 @@
   var allPartners = [];
   var filters = { search: "", regions: [], countries: [], categories: [], subcategories: [] };
   var selectedId = null;
+  var currentDirectoryViewMode = "map";
+  var lastMainListImpressionSignature = null;
+  var searchTrackTimer = null;
   // Full Nauticworx country list, source: data/partners.json's own
   // options.countries block — the same authoritative reference list the
   // live production Partner Program frontend uses to populate its own
@@ -2590,9 +2662,10 @@
     var contactHref = p.contactUrl ? escapeAttr(p.contactUrl) : "";
     var websiteHref = p.websiteUrl ? escapeAttr(p.websiteUrl) : "";
     if (!contactHref && !websiteHref) return "";
+    var analyticsAttrs = ' data-nwx-partner-name="' + escapeAttr(p.name || "") + '" data-nwx-partner-page-url="' + escapeAttr(p.partnerPageUrl || "") + '"';
     return '<div class="pc-actions">' +
-      (contactHref ? '<a class="pc-btn" href="' + contactHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.contactCtaLabel || "Contact Partner") + "</a>" : "") +
-      (websiteHref ? '<a class="pc-btn pc-btn-primary" href="' + websiteHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE + "</a>" : "") +
+      (contactHref ? '<a class="pc-btn nwx-contact-cta" data-nwx-action="partner_contact_click"' + analyticsAttrs + ' href="' + contactHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.contactCtaLabel || "Contact Partner") + "</a>" : "") +
+      (websiteHref ? '<a class="pc-btn pc-btn-primary nwx-profile-cta" data-nwx-action="partner_website_click"' + analyticsAttrs + ' href="' + websiteHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE + "</a>" : "") +
       "</div>";
   }
   function geoLineHTML(p) {
@@ -2610,7 +2683,7 @@
   function nameHTML(p, cssClass) {
     var text = escapeHtml(p.name);
     if (p.partnerPageUrl) {
-      return '<a class="' + cssClass + '" href="' + escapeAttr(p.partnerPageUrl) + '" onclick="event.stopPropagation()">' + text + "</a>";
+      return '<a class="' + cssClass + ' nwx-partner-name" data-nwx-action="partner_page_click" data-nwx-partner-name="' + escapeAttr(p.name || "") + '" data-nwx-partner-page-url="' + escapeAttr(p.partnerPageUrl || "") + '" href="' + escapeAttr(p.partnerPageUrl) + '" onclick="event.stopPropagation()">' + text + "</a>";
     }
     return '<span class="' + cssClass + '">' + text + "</span>";
   }
@@ -2642,7 +2715,7 @@
     el.setAttribute("data-partner-id", p.__id);
     el.innerHTML = cardHTML(p);
     // Grid cards open the full Preview Overlay directly (Task 6).
-    el.addEventListener("click", function () { openPreviewOverlay(p); });
+    el.addEventListener("click", function () { openPreviewOverlay(p, "main_list"); });
     return el;
   }
 
@@ -2679,12 +2752,23 @@
     list.forEach(function (p) { container.appendChild(builder(p)); });
   }
 
+  function trackMainListImpressions(filtered) {
+    if (typeof window.nwxTrackPartnerImpression !== "function") return;
+    var signature = currentDirectoryViewMode + ":" + filtered.map(function (p) {
+      return p.partnerPageUrl || p.name || p.__id;
+    }).join("|");
+    if (signature === lastMainListImpressionSignature) return;
+    lastMainListImpressionSignature = signature;
+    filtered.forEach(function (p) { window.nwxTrackPartnerImpression(p, "main_list"); });
+  }
+
   function renderAll() {
     var filtered = getFilteredPartners();
     renderSelectedFilterChips();
     renderInto(railList, filtered, "Try adjusting search or filters.", buildCompactCardEl);
     renderInto(listGrid, filtered, "Try adjusting search or filters.", buildCardEl);
     resultCount.textContent = filtered.length + (filtered.length === 1 ? " partner" : " partners") + " found";
+    trackMainListImpressions(filtered);
     dispatchPartnerFilterState();
   }
   // Read-only bridge used by the Network Coverage region popup. It keeps
@@ -2705,10 +2789,10 @@
     return fileName ? ("assets/" + encodeURIComponent(fileName).replace(/%2F/g, "/")) : "";
   };
 
-  window.nwxOpenPartnerPreviewById = function (partnerId) {
+  window.nwxOpenPartnerPreviewById = function (partnerId, source) {
     var id = String(partnerId);
     var partner = allPartners.find(function (p) { return String(p.__id) === id; });
-    if (partner) openPreviewOverlay(partner);
+    if (partner) openPreviewOverlay(partner, source || "");
   };
 
   function dispatchPartnerFilterState() {
@@ -2813,7 +2897,15 @@
 
     document.getElementById("ppc-geo-line").innerHTML = geoLineHTML(p);
 
-    document.getElementById("ppc-more").onclick = function () { openPreviewOverlay(p); };
+    var ppcMore = document.getElementById("ppc-more");
+    ppcMore.onclick = function () { openPreviewOverlay(p, "sidebar"); };
+
+    [contactBtn, websiteBtn].forEach(function (btn) {
+      btn.setAttribute("data-nwx-partner-name", p.name || "");
+      btn.setAttribute("data-nwx-partner-page-url", p.partnerPageUrl || "");
+    });
+    contactBtn.setAttribute("data-nwx-action", "partner_contact_click");
+    websiteBtn.setAttribute("data-nwx-action", "partner_website_click");
 
     profileCard.classList.add("visible");
   }
@@ -2856,13 +2948,29 @@
   // Contact Partner, Visit Website, Open Full Partner Page. Opening/
   // closing this never mutates filters, search, view mode, or the
   // selected-partner state underneath it — that state is untouched here. ----
-  function openPreviewOverlay(p) {
+  function openPreviewOverlay(p, source) {
+    source = source || "";
+    if (typeof window.nwxTrackEvent === "function") {
+      var previewPayload = {
+        partner_name: p.name || "",
+        partner_page_url: p.partnerPageUrl || "",
+        source: source
+      };
+      // Keep the existing profile-view event for continuity, and add the
+      // Mapbox-specific preview event for the new full popup preview.
+      window.nwxTrackEvent("partner_profile_view", previewPayload);
+      window.nwxTrackEvent("partner_preview_open", previewPayload);
+    }
+
     document.getElementById("ppo-name-wrap").innerHTML = nameHTML(p, "ppo-title-link ppo-title-plain");
 
     var openFullBtn = document.getElementById("ppo-open-full");
     if (p.partnerPageUrl) {
       openFullBtn.href = p.partnerPageUrl;
       openFullBtn.style.display = "";
+      openFullBtn.setAttribute("data-nwx-action", "partner_page_click");
+      openFullBtn.setAttribute("data-nwx-partner-name", p.name || "");
+      openFullBtn.setAttribute("data-nwx-partner-page-url", p.partnerPageUrl || "");
     } else {
       openFullBtn.style.display = "none";
     }
@@ -2912,9 +3020,23 @@
   // ---- Map/List toggle coexistence (Task 5) — listens for the event the
   // Network Coverage script dispatches; never touches the map itself. ----
   window.addEventListener("nwxviewmode", function (e) {
-    listView.classList.toggle("visible", e.detail && e.detail.mode === "list");
+    currentDirectoryViewMode = (e.detail && e.detail.mode === "list") ? "list" : "map";
+    listView.classList.toggle("visible", currentDirectoryViewMode === "list");
     closePartnerProfileCard();
+    trackMainListImpressions(getFilteredPartners());
   });
+
+  function trackFilterSelection(filterName, value) {
+    if (!value || typeof window.nwxTrackEvent !== "function") return;
+    window.nwxTrackEvent("map_filter_select", {
+      filter_name: filterName,
+      filter_value: value,
+      active_categories: filters.categories.join("|"),
+      active_subcategories: filters.subcategories.join("|"),
+      active_regions: filters.regions.join("|"),
+      active_countries: filters.countries.join("|")
+    });
+  }
 
   // ---- search + filter wiring (Task 3) ----
   searchInputs.forEach(function (input) {
@@ -2922,28 +3044,62 @@
       filters.search = input.value || "";
       searchInputs.forEach(function (other) { if (other !== input) other.value = filters.search; });
       renderAll();
+      clearTimeout(searchTrackTimer);
+      searchTrackTimer = setTimeout(function () {
+        if (filters.search && typeof window.nwxTrackEvent === "function") {
+          window.nwxTrackEvent("map_search", { search_term: filters.search });
+        }
+      }, 600);
     });
   });
   regionSelect.addEventListener("change", function () {
-    addUniqueFilterValue(filters.regions, regionSelect.value);
+    var value = regionSelect.value;
+    addUniqueFilterValue(filters.regions, value);
     regionSelect.value = "";
     populateCountryOptions();
     renderAll();
+    trackFilterSelection("region", value);
   });
   countrySelect.addEventListener("change", function () {
-    applyCountryFilter(countrySelect.value);
+    var value = countrySelect.value;
+    applyCountryFilter(value);
+    trackFilterSelection("country", value);
   });
   categorySelect.addEventListener("change", function () {
-    addUniqueFilterValue(filters.categories, categorySelect.value);
+    var value = categorySelect.value;
+    addUniqueFilterValue(filters.categories, value);
     categorySelect.value = "";
     populateSubcategoryOptions();
     renderAll();
+    trackFilterSelection("category", value);
   });
   subcategorySelect.addEventListener("change", function () {
-    addUniqueFilterValue(filters.subcategories, subcategorySelect.value);
+    var value = subcategorySelect.value;
+    addUniqueFilterValue(filters.subcategories, value);
     subcategorySelect.value = "";
     renderAll();
+    trackFilterSelection("subcategory", value);
   });
+
+  // Partner CTA/name analytics. Capture phase is intentional: generated
+  // links stop propagation so the card itself does not open underneath the
+  // click, but analytics still needs to see the interaction.
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest && e.target.closest("[data-nwx-action]");
+    if (!link) return;
+    var action = link.getAttribute("data-nwx-action");
+    if (!action || typeof window.nwxTrackEvent !== "function") return;
+    var source = "";
+    if (link.closest("#partner-preview-overlay")) source = "detail_modal";
+    else if (link.closest("#partner-profile-card")) source = "sidebar";
+    else if (link.closest(".partner-card")) source = "main_list";
+    else if (link.closest(".mini-card")) source = "sidebar";
+    window.nwxTrackEvent(action, {
+      partner_name: link.getAttribute("data-nwx-partner-name") || "",
+      partner_page_url: link.getAttribute("data-nwx-partner-page-url") || "",
+      source: source
+    });
+  }, true);
 
   // Global "Reset all filters" control (matches the current live Partner
   // Program's control/behavior). Clears every filter dimension this script
