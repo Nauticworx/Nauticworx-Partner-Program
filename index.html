@@ -769,38 +769,52 @@
   #mobile-stats { justify-content: flex-start; }
   #mobile-stats .pill { flex: 0 0 auto; min-width: 150px; text-align: left; padding: 8px 14px; }
 
-  /* ---------- WORLD-VIEW REGION CHIPS ----------
-     Region name is always visible (no hover required). Navy fill, thin
-     orange border, white name, orange count. Flat — no glow, no gradient,
-     no oversized bubble. */
-  .nwx-chip {
-    display: inline-flex;
+  /* ---------- WORLD-VIEW REGION PINS ----------
+     Count-only 3D-style location pin (navy body, orange border/accent).
+     The region name is intentionally not shown on the marker face -- it
+     stays available via aria-label, the hover/focus tooltip (reuses the
+     same .nwx-marker-wrap/.nwx-marker-label pattern the country markers
+     already use, below), and the region popup title. Compact by design
+     to cut world-map clutter versus the old ~110px-wide name chip. */
+  .nwx-region-pin-wrap {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    background: var(--nwx-navy);
+  }
+  .nwx-region-pin {
+    width: 26px;
+    height: 26px;
+    border-radius: 50% 50% 50% 0;
+    background: linear-gradient(150deg, #0c3f6a 0%, var(--nwx-navy) 55%, #010d1c 100%);
     border: 1.5px solid var(--nwx-orange);
-    border-radius: 8px;
-    padding: 6px 11px 6px 13px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -6px 7px rgba(0,0,0,0.28);
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    white-space: nowrap;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-    font-family: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
-  .nwx-chip:hover {
-    transform: scale(1.05);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.55);
+  .nwx-region-pin:hover,
+  .nwx-region-pin-wrap:focus-within .nwx-region-pin {
+    transform: rotate(-45deg) scale(1.1);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
   }
-  .nwx-chip .chip-name {
-    color: #ffffff;
-    font-weight: 700;
+  .nwx-region-pin .pin-count {
+    transform: rotate(45deg);
+    color: var(--nwx-orange);
+    font-weight: 800;
     font-size: 11.5px;
     letter-spacing: 0.2px;
   }
-  .nwx-chip .chip-count {
-    color: var(--nwx-orange);
-    font-weight: 800;
-    font-size: 13px;
+  .nwx-region-pin-shadow {
+    width: 13px;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.42);
+    filter: blur(1px);
+    pointer-events: none;
   }
 
   /* ---------- COUNTRY-LEVEL MARKERS ----------
@@ -1317,9 +1331,11 @@
     line-height: 1.35;
     padding: 2px 0;
   }
-  .nwx-chip.is-selected {
-    box-shadow: 0 0 0 2px rgba(232,100,44,0.28), 0 3px 12px rgba(0,0,0,0.55);
+  .nwx-region-pin.is-selected {
+    background: var(--nwx-orange);
+    border-color: #fff;
   }
+  .nwx-region-pin.is-selected .pin-count { color: #fff; }
   .nwx-marker.country-marker.is-selected {
     background: var(--nwx-orange);
     color: #fff;
@@ -1332,9 +1348,8 @@
     #mobile-bar, #mobile-stats { display: flex; }
     .nwx-marker { width: 38px; height: 38px; font-size: 13px; }
     .nwx-marker.country-marker { width: 26px; height: 26px; font-size: 10.5px; }
-    .nwx-chip { padding: 5px 9px 5px 11px; gap: 6px; }
-    .nwx-chip .chip-name { font-size: 10.5px; }
-    .nwx-chip .chip-count { font-size: 12px; }
+    .nwx-region-pin { width: 22px; height: 22px; }
+    .nwx-region-pin .pin-count { font-size: 10.5px; }
   }
 </style>
 </head>
@@ -1521,20 +1536,18 @@
   var REGION_ZOOM_DESKTOP = 3.6;
   var REGION_ZOOM_MOBILE = 2.9;
 
-  // Restrained PIXEL offsets (screen-space only) applied to a small number of
-  // region chips whose true geographic anchors sit close enough together at
-  // world-view zoom to visually crowd (computed via Web Mercator projection
-  // at zoom 2.15: Southern Europe/Southeastern Europe ~80px apart, Central
-  // Africa/East Africa ~107px apart — both under a chip's ~110px width).
-  // The underlying region.coordinates value is NEVER changed by this — the
-  // marker's true anchor stays geographically correct; only the rendered
-  // element is nudged. Regions not listed here get [0, 0] (no offset).
-  var REGION_CHIP_OFFSETS = {
-    "southern-europe": [-8, 16],
-    "southeastern-europe": [20, -6],
-    "central-africa": [-10, 10],
-    "east-africa": [14, -8]
-  };
+  // Restrained PIXEL offsets (screen-space only), reserved for any region
+  // pins whose true geographic anchors sit close enough together at
+  // world-view zoom to visually crowd. Reassessed for the count-only pin
+  // marker (~22-26px) replacing the old ~110px-wide name chip: the closest
+  // pairs this was tuned for -- Southern Europe/Southeastern Europe ~80px
+  // apart, Central Africa/East Africa ~107px apart (computed via Web
+  // Mercator projection at zoom 2.15) -- both clear a pin this narrow with
+  // room to spare, so no offsets are needed today. The underlying
+  // region.coordinates value is NEVER changed by this — the marker's true
+  // anchor stays geographically correct; only the rendered element would be
+  // nudged. Regions not listed here get [0, 0] (no offset).
+  var REGION_CHIP_OFFSETS = {};
 
   function isMobile() { return window.innerWidth <= 860; }
 
@@ -1860,7 +1873,10 @@
       });
       var marker = new mapboxgl.Marker({
         element: el,
-        anchor: "center",
+        // "bottom" anchors the pin's shadow (the true ground point of the
+        // 3D pin silhouette) at the real coordinate, rather than the
+        // vertical center of a symmetric badge.
+        anchor: "bottom",
         // Screen-space-only nudge for a handful of geographically close
         // regions (see REGION_CHIP_OFFSETS) — the LngLat anchor below is
         // always the region's real, unmodified coordinates.
@@ -1911,7 +1927,8 @@
 
     regions.forEach(function (region) {
       var regionEl = buildRegionChipEl(region);
-      regionEl.classList.add("is-selected");
+      var regionPinEl = regionEl.querySelector(".nwx-region-pin");
+      if (regionPinEl) regionPinEl.classList.add("is-selected");
       regionEl.addEventListener("click", function (e) {
         e.stopPropagation();
         closeFloatingPartnerCard();
@@ -1928,7 +1945,7 @@
       });
       var regionMarker = new mapboxgl.Marker({
         element: regionEl,
-        anchor: "center",
+        anchor: "bottom",
         offset: REGION_CHIP_OFFSETS[region.id] || [0, 0]
       }).setLngLat(region.coordinates).addTo(map);
       markers.push(regionMarker);
@@ -2044,26 +2061,37 @@
 
   // ---------------- MARKER + POPUP BUILDERS ----------------
 
-  // World-view region marker: a compact chip with the region name always
-  // visible (no hover required) and the uniqueAccounts count in orange.
+  // World-view region marker: a compact 3D-style location pin showing only
+  // the uniqueAccounts count -- no region name on the marker face. The full
+  // name stays available via aria-label, the hover/focus tooltip (same
+  // .nwx-marker-wrap/.nwx-marker-label pattern the country markers use),
+  // and the region popup title, none of which changed.
   function buildRegionChipEl(region) {
-    var chip = document.createElement("div");
-    chip.className = "nwx-chip";
-    chip.setAttribute("role", "button");
-    chip.setAttribute("data-region-id", region.id);
-    chip.setAttribute("aria-label", region.name + ": " + region.uniqueAccounts + " unique accounts");
+    var wrap = document.createElement("div");
+    wrap.className = "nwx-marker-wrap nwx-region-pin-wrap";
+    wrap.setAttribute("data-region-id", region.id);
 
-    var nameEl = document.createElement("span");
-    nameEl.className = "chip-name";
-    nameEl.textContent = region.name;
+    var pin = document.createElement("div");
+    pin.className = "nwx-region-pin";
+    pin.setAttribute("role", "button");
+    pin.setAttribute("aria-label", region.name + ": " + region.uniqueAccounts + " unique accounts");
 
     var countEl = document.createElement("span");
-    countEl.className = "chip-count";
+    countEl.className = "pin-count";
     countEl.textContent = region.uniqueAccounts;
+    pin.appendChild(countEl);
 
-    chip.appendChild(nameEl);
-    chip.appendChild(countEl);
-    return chip;
+    var shadow = document.createElement("div");
+    shadow.className = "nwx-region-pin-shadow";
+
+    var tag = document.createElement("div");
+    tag.className = "nwx-marker-label";
+    tag.textContent = region.name;
+
+    wrap.appendChild(pin);
+    wrap.appendChild(shadow);
+    wrap.appendChild(tag);
+    return wrap;
   }
 
   // Drill-down country marker: smaller compact circle, name available via
