@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-10T08:14:51.584Z",
+  "updatedAt": "2026-09-23T12:44:49.666Z",
   "partners": [
     {
       "region": "Northern Europe",
@@ -20,7 +20,7 @@
         "Ship Finance and Leasing"
       ],
       "name": "Beequip Equipment Finance",
-      "description": "",
+      "description": "Beequip is a financing partner built for operators. We work with businesses in maritime, construction and logistics that rely on equipment every day. Workboats, heavy assets, machines, when they need to perform, financing should not slow things down. We understand how operations run. Tight schedules. High utilisation. No room for delay. That's why we keep things simple. We listen, we move fast, and we structure financing that works in practice, not just on paper.",
       "testimonial": "",
       "contactName": "",
       "contactTitle": "",
@@ -30,7 +30,12 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/beequip-equipment-finance/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/beequip-equipment-finance/",
+      "servicesOffered": [
+        "New vessels and fleet expansion",
+        "Replacement of existing equipment",
+        "Refinancing of current assets"
+      ]
     },
     {
       "region": "Northern Europe",
@@ -49,7 +54,7 @@
         "Turnkey Shipbuilding"
       ],
       "name": "EGNA Marine",
-      "description": "",
+      "description": "EGNA Marine B.V. is a Rotterdam-based naval architecture, marine engineering and shipbuilding company. We provide concept, basic and detailed engineering, including naval architecture, structural design, piping, outfitting, electrical engineering, CFD, FEM and project management. Through our teams in the Netherlands and Turkey and our shipbuilding network, we also offer turnkey newbuild solutions for tugs, workboats, mooring boats, patrol vessels, utility vessels and other specialized craft, with strong experience in electric and hybrid propulsion.",
       "testimonial": "",
       "contactName": "Gokce Koc",
       "contactTitle": "",
@@ -59,7 +64,13 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/egna-marine/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/egna-marine/",
+      "servicesOffered": [
+        "Customers can expect flexible, practical and technically strong support throughout the full vessel lifecycle. EGNA Marine provides a broad range of naval architecture and marine engineering services, from early concept development and feasibility studies to basic and detailed engineering, production support and project management. Our capabilities include naval architecture, structural design and modelling, piping and mechanical systems, outfitting, electrical engineering, CFD and FEM analysis.",
+        "We work closely with shipowners, operators, shipyards and project teams to develop solutions that are technically sound, buildable and suited to the actual operational requirements of the vessel. Depending on the project, we can support a specific engineering scope, provide additional engineering capacity, manage complete work packages or take responsibility for the full design and engineering process.",
+        "Through our established shipbuilding and production network in Turkey, we can also offer turnkey newbuild solutions for tugs, workboats, mooring boats, patrol vessels, utility vessels and other specialized craft.",
+        "Customers can expect clear communication, short response times, direct access to experienced engineers and a flexible approach to changing project needs. We focus on reliable delivery, practical problem-solving and maintaining close cooperation throughout the project. Our aim is not only to provide drawings and calculations, but to become a dependable technical and project partner from the first idea through to construction and delivery."
+      ]
     },
     {
       "region": "Northern Europe",
@@ -93,7 +104,7 @@
         "Insurance & P&I Services"
       ],
       "name": "FDR",
-      "description": "",
+      "description": "FDR is an independent, family-owned Dutch maritime and energy insurance broker who truly understands the shipping and energy industry's ins and outs. With our extensive knowledge and expertise, we can create insurance solutions tailored to your specific needs. Our dedicated team, with over 150 years of combined experience and specialised skills, is available 24/7 to provide unwavering support. We understand the complex challenges your business may face. Through our risk mapping approach, we create an interactive relationship so we can work with you to anticipate hazards in shipping, transportation of goods, energy, transportation, logistics, freight forwarding and liability, and other areas.",
       "testimonial": "",
       "contactName": "Robert MacKay",
       "contactTitle": "",
@@ -103,7 +114,14 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/fdr-risk/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/fdr-risk/",
+      "servicesOffered": [
+        "Insurance Lines offered — Maritime: Hull & Machinery covers physical damage to vessels and engines arising from uncertain incidents as well as external causes; Loss of Hire protects you against loss of income when your vessel is out of operation due to a claim subject to recovery under H&M insurance.; Protection & Indemnity provides coverage concerning maritime liabilities. However, P&I is complex because of its many conditions, limitations and provisions which can be included in the policy by an insurer. Therefore, an intensive risk analysis is necessary to assess collision and manning risks while providing appropriate cover for all contractual liabilities.; Freight, Demurrage & Defence is a legal expense insurance to cover legal costs in case of a dispute about the interpretation of contractual agreements. This includes freight disputes, demurrage, hire and rental. At the same time, it covers all matters concerning conflicts that could arise in connection with the commercial operation of the vessel.",
+        "Marine Cargo Transport Risk incl. project cargo-Coverage can then be tailored to reflect the nature and value of goods, including specific considerations for fragile or temperature-sensitive cargo. Also covering: Energy and Offshore; Transport and Logistics; Liability; Construction All Risks; Commercial property; Cyber",
+        "War Risk Protection: Political volatility can pose a significant threat to your business. The war risk protection cover helps safeguard your business against unforeseen political events and the consequential economic implications they could pose for your business.",
+        "Charterers liability: Charterers are exposed to significant risks caused by third parties due to contractual obligations in Charter Parties or Bills of Lading.",
+        "Additional services: Risk and Insurance analys; Risk management; Claims management"
+      ]
     },
     {
       "region": "Northern Europe",
@@ -122,7 +140,7 @@
         "Energy Efficiency Solutions"
       ],
       "name": "Hull Vane",
-      "description": "",
+      "description": "Hull Vane BV develops and provides innovative solutions to improve a vessel's efficiency, capabilities and seakeeping.",
       "testimonial": "",
       "contactName": "Arjen Barendse",
       "contactTitle": "",
@@ -132,7 +150,12 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/hull-vane-bv/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/hull-vane-bv/",
+      "servicesOffered": [
+        "Hull Vane®: A patented energy-saving device for displacement vessels. Customizable through CFD analysis, it can reduce fuel consumption by 5-25% depending on vessel characteristics. Available in T-shaped, U-shaped, and Dynamic variants.",
+        "Foil Assist: A mid-ship mounted application for fast planing craft that transfers up to 50% of weight to a foil, enhancing efficiency and seakeeping in waves while reducing crew fatigue.",
+        "Both solutions aim to improve a vessels capabilities such as top speed, range, silence and seakeeping while reducing lifecycle costs and environmental impact."
+      ]
     },
     {
       "region": "Southern Africa",
@@ -152,7 +175,7 @@
         "Ship Repair & Conversion"
       ],
       "name": "Kraatz (Pty) Ltd",
-      "description": "",
+      "description": "With a legacy steeped in rich heritage and unwavering commitment, we are a trusted name among national and international clients across the on-shore, off-shore, mining and industrial sectors. Our presence in Walvis Bay ensures that we deliver comprehensive, world-class and value-driven engineering solutions tailored to meet the unique needs of our clients. Kraatz is not just service provider, but a partner, dedicated to fostering growth and innovation through exceptional and engineering expertise. Our core business provides specialized estimation, fabrication, installation, service, repair & maintenance to a vast range of assets in the industrial & maritime engineering industries. ISO9001:2015 Certified: DNV",
       "testimonial": "",
       "contactName": "",
       "contactTitle": "",
@@ -162,7 +185,33 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/kraatz/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/kraatz/",
+      "servicesOffered": [
+        "Offshore maintenance and repair crews (Riding crews, or crews can assist alongside when vessel is moored outside of Namibia)",
+        "Ship repairs and Maintenance.",
+        "Dry Docking (Contact for capacity).",
+        "Steel repairs and fabrications.",
+        "Pipe line repairs and new fabrications.",
+        "Boat/Surfer Landing fabrication and supply all over Africa.",
+        "Mechanical works, valves, pumps and propulsion services, winch overhaul.",
+        "HP washing and Hull cleaning.",
+        "Grit blast and Paint of full vessel hulls and superstructures and tanks internals.",
+        "Tank cleaning and safe disposals (Fuel tanks, FW, BW, bilges).",
+        "NDT inspections.",
+        "Annual surveys.",
+        "Carpentry works, deck wood and accommodations.",
+        "AC works.",
+        "Rigging Services",
+        "Main engines and Auxiliaries.",
+        "Below waterline marine growth scrapping.",
+        "Propeller repairs and polishing.",
+        "Scaffolding services.",
+        "Project management on behalf of clients if they do not have a local representative.",
+        "Diving Services.",
+        "Davit and Lifeboat services.",
+        "Fire Fighting equipment services",
+        "Class approved welders (DNV, ABS and BV)"
+      ]
     },
     {
       "region": "West Africa",
@@ -181,7 +230,7 @@
         "Warehousing & Storage"
       ],
       "name": "PETRO-SEA LOGISTICS",
-      "description": "",
+      "description": "JV between PETROCI HOLDING (the Ivorian national oil company) and SEA-invest (a major global port terminal operator), PETRO-SEA LOGISTICS (PSL) is the leading port logistics supplier for oil & gas operations in Côte d'Ivoire. The company was established to manage, modernize and operate the strategic Vridi Logistics Base in Abidjan to support offshore drilling, exploration and production activities.",
       "testimonial": "",
       "contactName": "",
       "contactTitle": "",
@@ -191,7 +240,12 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/petro-sea-logistics/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/petro-sea-logistics/",
+      "servicesOffered": [
+        "Oil & Gas Supply Base Services: Quayside services (berth management, vessels loading and offloading); Material handling using mobile cranes and forklifts; Storage and yard management (open-air laydown area, warehouses, offices); Bulk liquid & chemical logistics (infrastructure to mix, store and pump drilling mud, potable water and fuel directly into docked vessels); Container-Carrying Units (CCUs, baskets and skips) for cargo-securing services to withstand rough ocean transit",
+        "Crane Rental and Lifting Services: Provision of machinery and technical expertise needed to move, lift and position heavy and out of gauge loads.; Mobile cranes from 60-ton up to 400-ton lifting capacity; Certified and experienced riggers",
+        "Project Logistics: Specialized management of transporting large, heavy, high-value, or critical pices of equipment needed for industrial projects.; Faisability study for transporting and lifting heavy or oversized loads; Planning and execution of complex and coordinated lifting using high-capacity cranes"
+      ]
     },
     {
       "region": "West Africa",
@@ -210,7 +264,7 @@
         "Port Logistics & Stevedoring"
       ],
       "name": "Supermaritime",
-      "description": "",
+      "description": "Supermaritime Forwarding is a global logistics and freight forwarding company dedicated to providing reliable and efficient transport solutions across sea, air, and land. The company manages every aspect of the shipping process — from cargo booking, documentation, and customs formalities to storage and final delivery. With deep expertise in port operations and a strong international network, Supermaritime Forwarding offers tailored logistics services for a wide range of cargo types, including containerized goods, breakbulk, and complex project cargo. Their focus on flexibility, transparency, and customer care ensures that every shipment is handled with precision and delivered safely, on time, and cost-effectively.",
       "testimonial": "",
       "contactName": "",
       "contactTitle": "",
@@ -220,7 +274,13 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/supermaritime/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/supermaritime/",
+      "servicesOffered": [
+        "Freight forwarding & transportation: Ocean freight, air freight, road & rail freight; Multi-modal transportation and distribution services (local and international); Cross-trade solutions (moving cargo between third countries).",
+        "Project logistics & heavy-cargo handling: Handling complex, large, heavy, or \"out-of-gauge\" cargoes (e.g., industrial plants, modules).; Services such as project consultancy, load surveys, lashing studies, marshalling, turnkey transportation solutions.",
+        "Supply-chain & contract logistics: End-to-end supply chain management: design, implement, operate contract logistics and freight management solutions.; Warehousing & storage yard services.",
+        "Customs, value-added & support services: Services tailored to offshore / oil & gas sectors and the African region.; Import/export customs clearance, documentation, packing & crating, cargo assembly/consolidation."
+      ]
     },
     {
       "region": "Northern Europe",
@@ -241,7 +301,7 @@
         "Concept Design & Engineering"
       ],
       "name": "Vuyk Engineering",
-      "description": "",
+      "description": "Vuyk Engineering is an independent Maritime Design House specialising in high-quality engineering solutions across four key disciplines: ship design and conversion, methods engineering, equipment design and temporary steel design. We support shipowners, contractors, equipment suppliers, fabricators and shipyards in optimizing vessel and equipment designs, performance, and operational efficiency. We offer a wide range of design and engineering services to the maritime, dredging and offshore industries. From small, ad hoc assignments to fully integrated projects, our multidisciplinary expertise enables seamless coordination where needed, ensuring innovative, yet pragmatic, safe and fit-for-purpose solutions delivered efficiently and reliably.",
       "testimonial": "",
       "contactName": "",
       "contactTitle": "",
@@ -251,7 +311,13 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/vuyk-engineering/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/vuyk-engineering/",
+      "servicesOffered": [
+        "Ship Design and Conversion: Vuyk is recognized by shipowners and contractors worldwide for delivering bespoke ship designs and conversions across the full project lifecycle, from concept development to detailed engineering. Having strong knowledge of shipyard processes and practical construction methods, we handle both newbuild designs and vessel conversions/modifications, always aligned with operational requirements and applicable regulations.",
+        "Temporary Steel Design: Vuyk designs project-specific steel structures for maritime transport, installation and construction activities, including grillages, seafastenings, saddles and interface structures for heavy or sensitive cargos. Designs focus on structural behaviour, load paths, stiffness and friction characteristics and range from straightforward support structures to advanced engineered systems, integrated with vessel and mission equipment to ensure safe, efficient, and reliable operations.",
+        "Equipment Design: Vuyk develops mission-critical equipment, including motion-compensated systems, fallpipes, installation tools, handling systems and other project-specific solutions. Activities cover concept development, strength and performance assessments, integration studies and detailed engineering support. Our engineering approach combines technical analysis with practical knowledge of marine operations, resulting in fit-for-purpose equipment designs.",
+        "Methods Engineering: Vuyk supports marine operations through methods engineering, focusing on transport and installation activities. Services include workability assessments, lifting and rigging designs, motion and stability analyses, and towing and mooring assessments. All methods engineering work is grounded in hydrodynamics and dynamic behaviour, ensuring a clear understanding of operational limits. Combining analytical expertise with operational insight, Vuyk delivers robust, realistic assessments that enable safe, efficient, and controlled project execution."
+      ]
     },
     {
       "region": "Northern Europe",
@@ -270,7 +336,7 @@
         "Crew Transport & Transfers"
       ],
       "name": "Z-Bridge",
-      "description": "",
+      "description": "Z-Bridge is a Dutch company based in IJmuiden harbour in the larger Amsterdam area. The company is ISO 9001/140001/450001 Certified and member of IMCA. Established in 2017 the focus has been on improving the offshore access market, with the light weight fully motion compensated offshore access system called Bring-to-Work. With the focus on meeting the highest safety and performance levels the company support TIER1 contractor over the globe. The unique technical features of the Bring-to-Work system have secured their position in the market. As an alternative for \"W2W\" The system enables the operation on smaller vessels and optimizes the deck layout of smaller vessels.",
       "testimonial": "",
       "contactName": "Bastiaan Spruit",
       "contactTitle": "",
@@ -280,7 +346,13 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "https://drive.google.com/thumbnail?id=1bNrp9r4l23ha5TTRQS8h07BFIv9vOFgN&sz=w800",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/z-bridge-bring-to-work-system/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/z-bridge-bring-to-work-system/",
+      "servicesOffered": [
+        "The Z-Bridge's \"Bring-to-Work\" Offshore Access System, is fully motion compensated, light weight offshore Access System, weighing only 30 ton, providing a flexible landing heights from 8 to 20 meters above the deck. The Bring-to-Work system efficiently transfers teams up to 6 persons or 1000 kg of cargo using a trolley driven over the telescopic arm.",
+        "For larger or heavier items, the integrated crane can lift loads up to 1200 kg, providing a crane functionality for lifting materials both on the vessels deck and to and from offshore structure. The Bring-to-Work system is perfect for smaller vessels, unlocking new opportunities in the offshore access market at a competitive price point. It can also optimize deck space on larger vessels and maximizing its versatility in various types of projects.",
+        "Z-Bridge operates a fleet of rental system: Rental of the Bring-to-Work systems providing - Safe and efficient crew transfer operation, 6 PAX per trolley run; Cargo transfer of 1000 Kg per trolley run; Motion compensated hoisting with a SWL 1200 kg; Operational support; Provide trained operators; Technical management",
+        "Z-Bridge has extensive international experience operating for well-known contractors on Heavy Lift Vessels, in the O&M market operating on (mini)-SOV's and in the support of cable installation projects."
+      ]
     },
     {
       "region": "Southern Africa",
@@ -303,7 +375,7 @@
         "Crew Management & Manning"
       ],
       "name": "G.Gardner and Co (Pty)",
-      "description": "",
+      "description": "G.Gardner and Co (Pty) Ltd is a small, specialist marine crewing and seafarer placement company, with a cost-effective focus on the screening, recruitment, placement and management of marine offshore and onshore crew. Being African-based, with a keen understanding of the continent's vastness, cultures and intricacies, we offer professional, dependable day-to-day supply of personnel tailored to each client's needs. Sourcing experienced crew from across the globe gives clients the best quality-to-price ratio. Our core strength is deep, practical experience placing crews across Africa — North to South, East to West — with an additional track record worldwide, across the maritime, energy, dredging and civil sectors.",
       "testimonial": "",
       "contactName": "Gordon Gardner",
       "contactTitle": "",
@@ -313,7 +385,17 @@
       "contactCtaLabel": "Contact Partner",
       "logoUrl": "",
       "imageUrl": "",
-      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/g-gardner-and-co-pty-ltd/"
+      "partnerPageUrl": "https://www.nauticworx.com/our-trusted-partners/g-gardner-and-co-pty-ltd/",
+      "servicesOffered": [
+        "Seafarer Screening & Recruitment: Sourcing, screening and selection of qualified, reliable seafarers from a global talent pool, matched to each client's vessel and operational requirements.",
+        "Crew Placement: Placement of qualified seamen, officers and mates, pilots and captains, oilers, engineers and trainers across marine offshore and onshore operations.",
+        "Day-to-Day Crew Management: Ongoing project management of personnel in partnership with the client, tailored to individual operational needs rather than a one-off hire-and-hand-off.",
+        "Crew Rotation Planning: Coordination of crew rotation protocols to keep vessels and projects continuously and reliably staffed.",
+        "Visa Support: Client support for visa and travel documentation for international and local crew deployments.",
+        "Insurance Coordination: Management of crew insurance requirements as part of the placement and deployment process in line with MLC 2006.",
+        "International & Local Crew Logistics: Practical people-logistics experience moving crew across borders, including within Africa's varied regulatory and cultural landscape.",
+        "Sector & Vessel-Type Specialization: Dedicated recruitment for the maritime, energy, dredging and civil sectors, covering ASD/RSD tugs, offshore support and supply vessels, fast crew suppliers and pilot vessels, workboats and multi-cats, and cutter suction dredgers."
+      ]
     }
   ],
   "options": {
