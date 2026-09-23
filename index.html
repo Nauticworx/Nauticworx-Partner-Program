@@ -474,6 +474,7 @@
     white-space: pre-wrap;
   }
   .ppo-service-item + .ppo-service-item { border-top: 1px solid rgba(2,18,41,0.08); margin-top: 2px; }
+  .ppo-service-label { font-weight: 700; color: var(--nwx-navy); }
   .ppo-details { display: flex; flex-direction: column; gap: 10px; }
   .ppo-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: rgba(2,18,41,0.72); line-height: 1.4; }
   .ppo-row svg { width: 17px; height: 17px; flex: 0 0 17px; color: var(--nwx-orange); margin-top: 1px; }
@@ -2723,6 +2724,23 @@
   // tracking previously wired to the header's #ppo-open-full link, now
   // living in the sticky actions row instead). Kept separate from
   // actionsHTML() so the main grid card's two-button row stays untouched.
+  // Services Offered readability aid: if an item starts with a short lead
+  // label followed by ":" or an em dash, render just that label in
+  // semibold navy and the rest as normal body copy. Text itself is never
+  // altered — only which span wraps which characters.
+  function serviceItemHTML(s) {
+    var text = String(s == null ? "" : s);
+    var m = /^([^:—]{1,60})(:|—)\s*/.exec(text);
+    if (m) {
+      var label = m[1] + m[2];
+      var rest = text.slice(m[0].length);
+      if (rest) {
+        return '<span class="ppo-service-label">' + escapeHtml(label) + '</span> ' + escapeHtml(rest);
+      }
+    }
+    return escapeHtml(text);
+  }
+
   function ppoActionsHTML(p) {
     var contactHref = p.contactUrl ? escapeAttr(p.contactUrl) : "";
     var websiteHref = p.websiteUrl ? escapeAttr(p.websiteUrl) : "";
@@ -3057,7 +3075,7 @@
     var services = Array.isArray(p.servicesOffered) ? p.servicesOffered.filter(Boolean) : [];
     if (services.length) {
       document.getElementById("ppo-services").innerHTML = services.map(function (s) {
-        return '<div class="ppo-service-item">' + escapeHtml(s) + "</div>";
+        return '<div class="ppo-service-item">' + serviceItemHTML(s) + "</div>";
       }).join("");
       servicesSection.style.display = "";
     } else {
