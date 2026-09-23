@@ -2821,8 +2821,15 @@
     el.className = "mini-card" + (p.__id === selectedId ? " selected" : "");
     el.setAttribute("data-partner-id", p.__id);
     el.innerHTML = compactCardHTML(p);
-    // Sidebar entries show the compact floating panel (Task 2).
-    el.addEventListener("click", function (e) { e.stopPropagation(); selectPartner(p); });
+    // Sidebar entries open the full Preview Overlay directly (mini
+    // floating card removed — Partner Preview is now a single click away
+    // from anywhere in the directory).
+    el.addEventListener("click", function (e) {
+      e.stopPropagation();
+      selectedId = p.__id;
+      syncSelectedHighlight();
+      openPreviewOverlay(p, "sidebar");
+    });
     return el;
   }
 
@@ -2947,53 +2954,6 @@
     document.querySelectorAll(".partner-card, .mini-card").forEach(function (el) {
       el.classList.toggle("selected", el.getAttribute("data-partner-id") === String(selectedId));
     });
-  }
-
-  // ---- floating panel / drawer (Task 2) — compact preview shown over the
-  // map when a partner is selected from the sidebar. Full detail lives in
-  // the Preview Overlay (Task 6), reached via "View full profile" below. ----
-  function selectPartner(p) {
-    selectedId = p.__id;
-    syncSelectedHighlight();
-
-    document.getElementById("ppc-name-wrap").innerHTML = nameHTML(p, "ppc-name");
-    var subs = partnerSubcats(p);
-    var subBits = [p.category].concat(subs.length ? [subs.join(", ")] : []).filter(Boolean);
-    document.getElementById("ppc-sub").textContent = subBits.join(" · ");
-
-    document.getElementById("ppc-contact-line").innerHTML = contactLineHTML(p);
-
-    var contactBtn = document.getElementById("ppc-contact-btn");
-    if (p.contactUrl) {
-      contactBtn.href = p.contactUrl;
-      contactBtn.innerHTML = escapeHtml(p.contactCtaLabel || "Contact Partner");
-      contactBtn.style.display = "";
-    } else {
-      contactBtn.style.display = "none";
-    }
-
-    var websiteBtn = document.getElementById("ppc-website-btn");
-    if (p.websiteUrl) {
-      websiteBtn.href = p.websiteUrl;
-      websiteBtn.innerHTML = escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE;
-      websiteBtn.style.display = "";
-    } else {
-      websiteBtn.style.display = "none";
-    }
-
-    document.getElementById("ppc-geo-line").innerHTML = geoLineHTML(p);
-
-    var ppcMore = document.getElementById("ppc-more");
-    ppcMore.onclick = function () { openPreviewOverlay(p, "sidebar"); };
-
-    [contactBtn, websiteBtn].forEach(function (btn) {
-      btn.setAttribute("data-nwx-partner-name", p.name || "");
-      btn.setAttribute("data-nwx-partner-page-url", p.partnerPageUrl || "");
-    });
-    contactBtn.setAttribute("data-nwx-action", "partner_contact_click");
-    websiteBtn.setAttribute("data-nwx-action", "partner_website_click");
-
-    profileCard.classList.add("visible");
   }
 
   function closePartnerProfileCard() {
