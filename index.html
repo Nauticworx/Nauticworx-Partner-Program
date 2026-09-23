@@ -396,73 +396,113 @@
     position: absolute;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-    width: min(560px, calc(100% - 32px));
+    width: min(640px, calc(100% - 32px));
     max-height: calc(100% - 48px);
     overflow-y: auto;
-    background: var(--nwx-navy-soft);
-    border: 1px solid var(--nwx-border);
+    background: #ffffff;
+    border: 1px solid rgba(2,18,41,0.12);
     border-radius: 14px;
     box-shadow: 0 30px 80px rgba(0,0,0,0.55);
   }
   .ppo-header {
     position: sticky;
     top: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: var(--nwx-navy);
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--nwx-border);
+    gap: 14px;
+    background: #ffffff;
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(2,18,41,0.1);
     border-radius: 14px 14px 0 0;
   }
-  .ppo-header-text { min-width: 0; }
-  .ppo-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--nwx-orange); font-weight: 800; }
+  .ppo-logo {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: contain;
+    background: #f5f7f8;
+    border: 1px solid rgba(2,18,41,0.08);
+    padding: 6px;
+  }
+  .ppo-header-text { min-width: 0; flex: 1 1 auto; }
   .ppo-title-link, .ppo-title-plain {
     display: block;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 800;
-    color: var(--nwx-name);
+    color: var(--nwx-navy);
     text-decoration: none;
-    margin-top: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .ppo-title-link:hover { text-decoration: underline; }
-  .ppo-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
-  .ppo-open-full {
-    background: var(--nwx-orange);
-    border: 1px solid var(--nwx-orange);
-    color: #fff;
-    font-weight: 800;
-    font-size: 11.5px;
-    padding: 8px 11px;
-    border-radius: 7px;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .ppo-open-full:hover { background: var(--nwx-orange-dim); }
+  .ppo-header-meta { font-size: 12.5px; color: rgba(2,18,41,0.6); margin-top: 4px; }
   .ppo-close {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--nwx-border);
-    color: var(--nwx-name);
+    flex: 0 0 auto;
+    align-self: flex-start;
+    background: rgba(2,18,41,0.05);
+    border: 1px solid rgba(2,18,41,0.14);
+    color: var(--nwx-navy);
     font-size: 16px;
     line-height: 1;
     padding: 7px 10px;
     border-radius: 7px;
     cursor: pointer;
   }
-  .ppo-close:hover { background: rgba(255,255,255,0.12); }
-  .ppo-body { padding: 18px 20px 22px; }
-  .ppo-category { font-size: 12px; font-weight: 800; color: var(--nwx-orange); text-transform: uppercase; letter-spacing: 0.3px; }
-  .ppo-subcats { font-size: 12px; color: var(--nwx-name); margin-top: 3px; }
-  .ppo-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 12.5px; color: rgba(206,226,235,0.75); line-height: 1.4; }
-  .ppo-row svg { width: 17px; height: 17px; flex: 0 0 17px; color: rgba(206,226,235,0.6); margin-top: 1px; }
-  .ppo-desc { font-size: 12.5px; color: rgba(206,226,235,0.7); line-height: 1.55; margin-top: 14px; }
-  .ppo-testimonial { font-size: 12.5px; color: rgba(206,226,235,0.6); line-height: 1.55; margin-top: 10px; font-style: italic; border-left: 2px solid var(--nwx-orange); padding-left: 10px; }
-  .ppo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
-  .ppo-actions .pc-btn { padding: 10px 10px; font-size: 12px; }
+  .ppo-close:hover { background: rgba(2,18,41,0.1); }
+  .ppo-body { padding: 4px 22px 8px; }
+  .ppo-section-heading {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--nwx-orange);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 20px 0 10px;
+  }
+  .ppo-desc-section:first-child .ppo-section-heading { margin-top: 20px; }
+  .ppo-divider { border: none; border-top: 1px solid rgba(2,18,41,0.1); margin: 20px 0 0; }
+  .ppo-desc { font-size: 13.5px; color: rgba(2,18,41,0.82); line-height: 1.6; white-space: pre-wrap; }
+  .ppo-services { display: flex; flex-direction: column; }
+  .ppo-service-item {
+    padding: 10px 0 10px 14px;
+    border-left: 2px solid var(--nwx-orange);
+    font-size: 13.5px;
+    color: rgba(2,18,41,0.82);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .ppo-service-item + .ppo-service-item { border-top: 1px solid rgba(2,18,41,0.08); margin-top: 2px; }
+  .ppo-details { display: flex; flex-direction: column; gap: 10px; }
+  .ppo-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: rgba(2,18,41,0.72); line-height: 1.4; }
+  .ppo-row svg { width: 17px; height: 17px; flex: 0 0 17px; color: var(--nwx-orange); margin-top: 1px; }
+  .ppo-actions {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 14px 22px;
+    margin-top: 20px;
+    background: #ffffff;
+    border-top: 1px solid rgba(2,18,41,0.1);
+    border-radius: 0 0 14px 14px;
+  }
+  .ppo-actions .pc-btn {
+    padding: 10px 10px;
+    font-size: 12px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid rgba(2,18,41,0.18);
+    color: var(--nwx-navy);
+  }
+  .ppo-actions .pc-btn:hover { background: rgba(2,18,41,0.05); }
+  .ppo-actions .pc-btn.pc-btn-primary { background: var(--nwx-orange); border-color: var(--nwx-orange); color: #fff; }
+  .ppo-actions .pc-btn.pc-btn-primary:hover { background: var(--nwx-orange-dim); }
+  @media (max-width: 640px) {
+    .ppo-actions { grid-template-columns: 1fr; }
+  }
   .pc-meta-row.has-icon { display: flex; align-items: flex-start; gap: 6px; }
   .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .pc-btn {
@@ -1479,24 +1519,31 @@
   <div class="ppo-backdrop" id="ppo-backdrop"></div>
   <div class="ppo-panel" role="dialog" aria-modal="true" aria-labelledby="ppo-name">
     <div class="ppo-header">
+      <img class="ppo-logo" id="ppo-logo" src="" alt="" aria-hidden="true">
       <div class="ppo-header-text">
-        <div class="ppo-eyebrow">Partner Preview</div>
         <span id="ppo-name-wrap"></span>
+        <div class="ppo-header-meta" id="ppo-header-meta"></div>
       </div>
-      <div class="ppo-header-actions">
-        <a id="ppo-open-full" class="ppo-open-full" href="#" target="_blank" rel="noopener">Open Full Partner Page</a>
-        <button type="button" class="ppo-close" id="ppo-close" aria-label="Close preview">&times;</button>
-      </div>
+      <button type="button" class="ppo-close" id="ppo-close" aria-label="Close preview">&times;</button>
     </div>
     <div class="ppo-body">
-      <div class="ppo-category" id="ppo-category"></div>
-      <div class="ppo-subcats" id="ppo-subcats"></div>
-      <div class="ppo-row" id="ppo-contact-row"></div>
-      <div class="ppo-row" id="ppo-geo-row"></div>
-      <div class="ppo-desc" id="ppo-desc"></div>
-      <div class="ppo-testimonial" id="ppo-testimonial"></div>
-      <div class="ppo-actions" id="ppo-actions"></div>
+      <div class="ppo-desc-section" id="ppo-desc-section">
+        <div class="ppo-section-heading">Description</div>
+        <div class="ppo-desc" id="ppo-desc"></div>
+      </div>
+      <div class="ppo-services-section" id="ppo-services-section">
+        <div class="ppo-section-heading">Services Offered</div>
+        <div class="ppo-services" id="ppo-services"></div>
+      </div>
+      <hr class="ppo-divider">
+      <div class="ppo-section-heading">Partner Details</div>
+      <div class="ppo-details">
+        <div class="ppo-row" id="ppo-contact-row"></div>
+        <div class="ppo-row" id="ppo-country-row"></div>
+        <div class="ppo-row" id="ppo-regions-row"></div>
+      </div>
     </div>
+    <div class="ppo-actions" id="ppo-actions"></div>
   </div>
 </div>
 
@@ -2670,6 +2717,24 @@
       (websiteHref ? '<a class="pc-btn pc-btn-primary nwx-profile-cta" data-nwx-action="partner_website_click"' + analyticsAttrs + ' href="' + websiteHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE + "</a>" : "") +
       "</div>";
   }
+  // Partner Preview overlay actions row (redesign) — same Contact Partner /
+  // Visit Website markup and analytics attributes as actionsHTML(), plus a
+  // third "Open Full Partner Page" button (the same partner_page_click
+  // tracking previously wired to the header's #ppo-open-full link, now
+  // living in the sticky actions row instead). Kept separate from
+  // actionsHTML() so the main grid card's two-button row stays untouched.
+  function ppoActionsHTML(p) {
+    var contactHref = p.contactUrl ? escapeAttr(p.contactUrl) : "";
+    var websiteHref = p.websiteUrl ? escapeAttr(p.websiteUrl) : "";
+    var pageHref = p.partnerPageUrl ? escapeAttr(p.partnerPageUrl) : "";
+    if (!contactHref && !websiteHref && !pageHref) return "";
+    var analyticsAttrs = ' data-nwx-partner-name="' + escapeAttr(p.name || "") + '" data-nwx-partner-page-url="' + escapeAttr(p.partnerPageUrl || "") + '"';
+    return (
+      (contactHref ? '<a class="pc-btn nwx-contact-cta" data-nwx-action="partner_contact_click"' + analyticsAttrs + ' href="' + contactHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.contactCtaLabel || "Contact Partner") + "</a>" : "") +
+      (websiteHref ? '<a class="pc-btn pc-btn-primary nwx-profile-cta" data-nwx-action="partner_website_click"' + analyticsAttrs + ' href="' + websiteHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(p.ctaLabel || "Visit Website") + ICON_WEBSITE + "</a>" : "") +
+      (pageHref ? '<a class="pc-btn" data-nwx-action="partner_page_click"' + analyticsAttrs + ' href="' + pageHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open Full Partner Page</a>' : "")
+    );
+  }
   function geoLineHTML(p) {
     var regions = partnerRegions(p);
     var regionsLabel = p.regionsDisplay || regions.join(", ");
@@ -2966,41 +3031,54 @@
 
     document.getElementById("ppo-name-wrap").innerHTML = nameHTML(p, "ppo-title-link ppo-title-plain");
 
-    var openFullBtn = document.getElementById("ppo-open-full");
-    if (p.partnerPageUrl) {
-      openFullBtn.href = p.partnerPageUrl;
-      openFullBtn.style.display = "";
-      openFullBtn.setAttribute("data-nwx-action", "partner_page_click");
-      openFullBtn.setAttribute("data-nwx-partner-name", p.name || "");
-      openFullBtn.setAttribute("data-nwx-partner-page-url", p.partnerPageUrl || "");
+    var logoEl = document.getElementById("ppo-logo");
+    if (p.logoUrl) {
+      logoEl.src = p.logoUrl;
+      logoEl.alt = p.name || "";
+      logoEl.style.display = "";
     } else {
-      openFullBtn.style.display = "none";
+      logoEl.removeAttribute("src");
+      logoEl.style.display = "none";
     }
 
-    document.getElementById("ppo-category").textContent = p.category || "";
     var subs = partnerSubcats(p);
-    document.getElementById("ppo-subcats").textContent = subs.join(", ");
+    var metaBits = [p.category].concat(subs.length ? [subs.join(", ")] : []).filter(Boolean);
+    document.getElementById("ppo-header-meta").textContent = metaBits.join(" · ");
+
+    var descSection = document.getElementById("ppo-desc-section");
+    if (p.description) {
+      document.getElementById("ppo-desc").textContent = p.description;
+      descSection.style.display = "";
+    } else {
+      descSection.style.display = "none";
+    }
+
+    var servicesSection = document.getElementById("ppo-services-section");
+    var services = Array.isArray(p.servicesOffered) ? p.servicesOffered.filter(Boolean) : [];
+    if (services.length) {
+      document.getElementById("ppo-services").innerHTML = services.map(function (s) {
+        return '<div class="ppo-service-item">' + escapeHtml(s) + "</div>";
+      }).join("");
+      servicesSection.style.display = "";
+    } else {
+      servicesSection.style.display = "none";
+    }
 
     document.getElementById("ppo-contact-row").innerHTML = (p.contactName || p.contactTitle)
       ? ICON_CONTACT + "<span>" + escapeHtml([p.contactName, p.contactTitle].filter(Boolean).join(" · ")) + "</span>"
       : "";
 
-    var regions = partnerRegions(p);
-    var regionsLabel = p.regionsDisplay || regions.join(", ");
-    var geoText = [p.country, regionsLabel].filter(Boolean).join(" · ");
-    document.getElementById("ppo-geo-row").innerHTML = geoText
-      ? ICON_GEO + "<span>" + escapeHtml(geoText) + "</span>"
+    document.getElementById("ppo-country-row").innerHTML = p.country
+      ? ICON_GEO + "<span>" + escapeHtml(p.country) + "</span>"
       : "";
 
-    var descEl = document.getElementById("ppo-desc");
-    if (p.description) { descEl.textContent = p.description; descEl.style.display = ""; }
-    else { descEl.style.display = "none"; }
+    var regions = partnerRegions(p);
+    var regionsLabel = p.regionsDisplay || regions.join(", ");
+    document.getElementById("ppo-regions-row").innerHTML = regionsLabel
+      ? ICON_GEO + "<span>" + escapeHtml(regionsLabel) + "</span>"
+      : "";
 
-    var testimonialEl = document.getElementById("ppo-testimonial");
-    if (p.testimonial) { testimonialEl.textContent = '"' + p.testimonial + '"'; testimonialEl.style.display = ""; }
-    else { testimonialEl.style.display = "none"; }
-
-    document.getElementById("ppo-actions").innerHTML = actionsHTML(p);
+    document.getElementById("ppo-actions").innerHTML = ppoActionsHTML(p);
 
     previewOverlay.classList.add("visible");
     previewOverlay.setAttribute("aria-hidden", "false");
