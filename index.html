@@ -477,7 +477,7 @@
   .ppo-service-label { font-weight: 700; color: var(--nwx-navy); }
   .ppo-details { display: flex; flex-direction: column; gap: 10px; }
   .ppo-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: rgba(2,18,41,0.72); line-height: 1.4; }
-  .ppo-row svg { width: 17px; height: 17px; flex: 0 0 17px; color: var(--nwx-orange); margin-top: 1px; }
+  .ppo-row svg { width: 17px; height: 17px; flex: 0 0 17px; color: var(--nwx-orange); margin-top: 1px; } .ppo-row img.ppo-icon-office { width: 17px; height: 17px; flex: 0 0 17px; margin-top: 1px; object-fit: contain; }
   .ppo-actions {
     position: sticky;
     bottom: 0;
@@ -2678,7 +2678,7 @@
   // partner-contact-name.png, visit-partner.PNG) that were failing to
   // render. No new asset files; icons are pure inline markup + CSS. ----
   var ICON_GEO = '<svg class="pc-icon-geo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"></path></svg>';
-  var ICON_CONTACT = '<svg class="pc-icon-contact" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c.8-4.2 3.5-6 8-6s7.2 1.8 8 6"></path></svg>';
+  var ICON_CONTACT = '<svg class="pc-icon-contact" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c.8-4.2 3.5-6 8-6s7.2 1.8 8 6"></path></svg>'; var ICON_OFFICE = '<img class="ppo-icon-office" src="assets/Office.png" alt="" aria-hidden="true">';
   var ICON_WEBSITE = '<svg class="pc-icon-website" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M10 14 20 4"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"></path></svg>';
   var ICON_CHEVRON = '<svg class="mc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>';
   var CATEGORY_ICON_FILES = {
@@ -3049,7 +3049,7 @@
       : "";
 
     document.getElementById("ppo-country-row").innerHTML = p.country
-      ? ICON_GEO + "<span>" + escapeHtml(p.country) + "</span>"
+      ? ICON_OFFICE + "<span>" + escapeHtml(p.country) + "</span>"
       : "";
 
     var regions = partnerRegions(p);
