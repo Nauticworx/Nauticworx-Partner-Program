@@ -417,14 +417,14 @@
     border-radius: 14px 14px 0 0;
   }
   .ppo-logo {
-    flex: 0 0 auto;
-    width: 56px;
-    height: 56px;
-    border-radius: 8px;
+    display: block;
+    flex: 0 1 auto;
+    max-width: 140px;
+    max-height: 48px;
+    width: auto;
+    height: auto;
     object-fit: contain;
-    background: #f5f7f8;
-    border: 1px solid rgba(2,18,41,0.08);
-    padding: 6px;
+    align-self: center;
   }
   .ppo-header-text { min-width: 0; flex: 1 1 auto; }
   .ppo-title-link, .ppo-title-plain {
@@ -503,6 +503,7 @@
   .ppo-actions .pc-btn.pc-btn-primary:hover { background: var(--nwx-orange-dim); }
   @media (max-width: 640px) {
     .ppo-actions { grid-template-columns: 1fr; }
+    .ppo-logo { max-width: 84px; max-height: 34px; }
   }
   .pc-meta-row.has-icon { display: flex; align-items: flex-start; gap: 6px; }
   .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
@@ -1520,11 +1521,11 @@
   <div class="ppo-backdrop" id="ppo-backdrop"></div>
   <div class="ppo-panel" role="dialog" aria-modal="true" aria-labelledby="ppo-name">
     <div class="ppo-header">
-      <img class="ppo-logo" id="ppo-logo" src="" alt="" aria-hidden="true">
       <div class="ppo-header-text">
         <span id="ppo-name-wrap"></span>
         <div class="ppo-header-meta" id="ppo-header-meta"></div>
       </div>
+      <img class="ppo-logo" id="ppo-logo" src="" alt="" aria-hidden="true">
       <button type="button" class="ppo-close" id="ppo-close" aria-label="Close preview">&times;</button>
     </div>
     <div class="ppo-body">
@@ -2730,7 +2731,7 @@
   // altered — only which span wraps which characters.
   function serviceItemHTML(s) {
     var text = String(s == null ? "" : s);
-    var m = /^([^:—]{1,60})(:|—)\s*/.exec(text);
+    var m = /^([^:—]{1,40})(:|—)\s*/.exec(text);
     if (m) {
       var label = m[1] + m[2];
       var rest = text.slice(m[0].length);
@@ -3051,6 +3052,7 @@
 
     var logoEl = document.getElementById("ppo-logo");
     if (p.logoUrl) {
+      logoEl.onerror = function () { logoEl.style.display = "none"; };
       logoEl.src = p.logoUrl;
       logoEl.alt = p.name || "";
       logoEl.style.display = "";
