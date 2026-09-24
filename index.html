@@ -1164,7 +1164,7 @@
     --plv-muted: #52667a;
     --plv-line: #e3e9ef;
     --plv-icon: #6b7f93;
-    --plv-cols: minmax(190px, 1.4fr) minmax(140px, 1.3fr) minmax(120px, 1.1fr) minmax(90px, 0.75fr) minmax(110px, 1fr) 256px;
+    --plv-cols: minmax(180px, 1.3fr) minmax(160px, 1.5fr) minmax(120px, 1fr) minmax(90px, 0.7fr) minmax(110px, 0.9fr) 256px;
     max-width: 1400px;
     margin: 0 auto;
     background: #ffffff;
@@ -1213,33 +1213,24 @@
   }
   .plv-cell { min-width: 0; overflow-wrap: break-word; }
   .plv-partner { display: flex; align-items: center; gap: 12px; }
-  .plv-visual { position: relative; flex: 0 0 52px; }
-  .plv-cat-badge {
-    position: absolute;
-    right: -6px;
-    bottom: -6px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--nwx-navy);
-    border: 2px solid #ffffff;
-    padding: 3px;
-    display: flex;
-  }
-  .plv-cat-badge img { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .plv-logo-tile {
-    flex: 0 0 52px;
-    width: 52px;
-    height: 42px;
-    border-radius: 8px;
+  .plv-visual {
+    flex: 0 0 56px;
+    width: 56px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
   }
-  .plv-logo-tile.is-logo { background: #ffffff; border: 1px solid var(--plv-line); padding: 4px; }
-  .plv-logo-tile.is-icon { background: var(--nwx-navy); padding: 6px; }
-  .plv-logo-tile img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .plv-visual img.plv-logo { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+  .plv-class {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 9px;
+    align-items: center;
+  }
+  .plv-class .plv-cat-icon { width: 26px; height: 26px; object-fit: contain; display: block; grid-column: 1; grid-row: 1; }
+  .plv-class .plv-cat { grid-column: 2; grid-row: 1; }
+  .plv-class .plv-sub { grid-column: 2; grid-row: 2; }
   .plv-name-wrap { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .plv-name { font-size: 15.5px; font-weight: 800; line-height: 1.3; color: var(--plv-ink); }
   .plv-cat { color: var(--nwx-orange); font-weight: 500; }
@@ -1272,16 +1263,16 @@
   }
   .plv-actions .pc-btn:not(.pc-btn-primary):hover { border-color: var(--nwx-orange); color: var(--nwx-orange); background: #fff; }
 
-  /* Mid width (860–1015px List area): buttons stack in a narrower Actions column. */
-  @container plv (max-width: 1015px) {
-    .plv-table { --plv-cols: minmax(180px, 1.35fr) minmax(135px, 1.2fr) minmax(115px, 1fr) minmax(95px, 0.7fr) minmax(110px, 0.9fr) 140px; }
+  /* Mid width (860–1022px List area): buttons stack in a narrower Actions column. */
+  @container plv (max-width: 1022px) {
+    .plv-table { --plv-cols: minmax(160px, 1.3fr) minmax(140px, 1.4fr) minmax(110px, 1fr) minmax(85px, 0.7fr) minmax(100px, 0.9fr) 140px; }
     .plv-head, .plv-row { column-gap: 14px; }
     .plv-actions .pc-actions { grid-template-columns: 1fr; }
     .plv-actions .pc-btn:only-child { grid-column: auto; }
   }
   /* Tablet: Country + Regions share one Location column (still two lines). */
   @container plv (max-width: 859px) {
-    .plv-table { --plv-cols: minmax(140px, 1.3fr) minmax(115px, 1.1fr) minmax(105px, 1fr) minmax(105px, 1fr) 130px; }
+    .plv-table { --plv-cols: minmax(125px, 1.3fr) minmax(110px, 1.3fr) minmax(95px, 1fr) minmax(95px, 1fr) 125px; }
     .plv-head, .plv-row { column-gap: 12px; }
     .plv-head, .plv-row {
       grid-template-areas:
@@ -1312,7 +1303,7 @@
     }
     .plv-row > .plv-cell { grid-area: auto; margin-top: 0; }
     .plv-row:hover, .plv-row.selected, .plv-row:focus-visible { box-shadow: none; }
-    .plv-contact:empty { display: none; }
+    .plv-contact:empty, .plv-visual.is-empty { display: none; }
     .plv-actions { margin-top: 4px; }
     .plv-actions .pc-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .plv-actions .pc-btn:only-child { grid-column: 1 / -1; }
@@ -2776,6 +2767,16 @@
     "Technology, Digital & Innovation": "Technology, Digital & Innovation.png"
   };
 
+  // Dark variants (assets/icons-dark/, same filenames) for the white List
+  // table only; categoryIconHTML keeps the light icons for dark contexts.
+  function categoryIconDarkHTML(p, cssClass) {
+    var fileName = CATEGORY_ICON_FILES[p.category];
+    if (!fileName) return "";
+    return '<img class="' + cssClass + '" src="assets/icons-dark/' +
+      encodeURIComponent(fileName).replace(/%2F/g, "/") +
+      '" alt="" aria-hidden="true">';
+  }
+
   function categoryIconHTML(p, cssClass) {
     var fileName = CATEGORY_ICON_FILES[p.category];
     if (!fileName) return "";
@@ -2848,16 +2849,11 @@
   // propagation (actionsHTML) and keep their analytics attributes.
   var ICON_OFFICE_TABLE = '<img class="plv-office-icon" src="assets/Office.png" alt="" aria-hidden="true">';
 
-  // Partner visual: logo (primary) with the category icon as a small
-  // secondary badge; no logo -> category icon is the primary visual.
+  // Partner visual: logo only (no tile/border). No logo -> empty spacer so
+  // names stay aligned in the table (hidden in the stacked mobile layout).
   function rowLogoHTML(p) {
-    if (p.logoUrl) {
-      var badge = categoryIconHTML(p, "plv-cat-badge-icon");
-      return '<div class="plv-visual"><div class="plv-logo-tile is-logo"><img class="plv-logo" src="' + escapeAttr(p.logoUrl) + '" alt="" loading="lazy"></div>' +
-        (badge ? '<span class="plv-cat-badge">' + badge + "</span>" : "") + "</div>";
-    }
-    var icon = categoryIconHTML(p, "plv-cat-icon");
-    return icon ? '<div class="plv-visual"><div class="plv-logo-tile is-icon">' + icon + "</div></div>" : "";
+    if (!p.logoUrl) return '<div class="plv-visual is-empty" aria-hidden="true"></div>';
+    return '<div class="plv-visual"><img class="plv-logo" src="' + escapeAttr(p.logoUrl) + '" alt="" loading="lazy"></div>';
   }
 
   function rowHTML(p) {
@@ -2872,6 +2868,7 @@
         "</div>" +
       "</div>" +
       '<div class="plv-cell plv-class" role="cell">' +
+        categoryIconDarkHTML(p, "plv-cat-icon") +
         (p.category ? '<div class="plv-cat">' + escapeHtml(p.category) + "</div>" : "") +
         (subs.length ? '<div class="plv-sub">' + escapeHtml(subs.join(", ")) + "</div>" : "") +
       "</div>" +
@@ -2901,14 +2898,12 @@
     el.setAttribute("tabindex", "0");
     el.setAttribute("data-partner-id", p.__id);
     el.innerHTML = rowHTML(p);
-    // Broken/blocked logo -> fall back to the category icon tile.
+    // Broken/blocked logo -> empty spacer; the company name stands alone.
     var logo = el.querySelector("img.plv-logo");
     if (logo) {
       logo.onerror = function () {
         var visual = logo.closest(".plv-visual");
-        var icon = categoryIconHTML(p, "plv-cat-icon");
-        if (icon) visual.innerHTML = '<div class="plv-logo-tile is-icon">' + icon + "</div>";
-        else visual.parentNode.removeChild(visual);
+        if (visual) { visual.innerHTML = ""; visual.className = "plv-visual is-empty"; }
       };
     }
     el.addEventListener("click", function () { openPreviewOverlay(p, "main_list"); });
