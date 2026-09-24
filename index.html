@@ -514,22 +514,6 @@
     padding: 24px clamp(16px, 4vw, 48px);
   }
   #partner-list-view.visible { display: block; }
-  /* Explicit 3/2/1 responsive grid (redesign, Task 3) — was auto-fill. */
-  .plv-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  .plv-grid .partner-card { height: 100%; }
-  @media (max-width: 1100px) {
-    .plv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 640px) {
-    .plv-grid { grid-template-columns: 1fr; }
-  }
-
   /* ---------- RAIL: region/country browse (de-emphasized — the mockup's
      search/filter/result-card hierarchy is the primary rail content now;
      this is the same functional region drill-down as before, collapsed
@@ -1170,85 +1154,169 @@
   }
   .mini-card .mc-chev { margin-left: auto; }
 
-  /* List cards borrow the current Partner page's icon-led, structured card feel. */
-  .plv-grid .partner-card {
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(206,226,235,0.22);
-    border-radius: 12px;
-    padding: 14px;
-    gap: 8px;
-    box-shadow: none;
+
+  /* ---------- LIST VIEW: white table panel inside the dark List shell ----------
+     Header + rows share one column template. Breakpoints use the List
+     area's own width (container query), so the fixed rail is accounted for. */
+  #partner-list-view { container-type: inline-size; container-name: plv; }
+  .plv-table {
+    --plv-ink: #021229;
+    --plv-muted: #52667a;
+    --plv-line: #e3e9ef;
+    --plv-icon: #6b7f93;
+    --plv-cols: minmax(190px, 1.4fr) minmax(140px, 1.3fr) minmax(120px, 1.1fr) minmax(90px, 0.75fr) minmax(110px, 1fr) 256px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #ffffff;
+    color: var(--plv-ink);
+    border-radius: 14px;
+    padding: 8px 18px 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   }
-  .plv-grid .partner-card:hover,
-  .plv-grid .partner-card.selected {
-    background: rgba(255,255,255,0.065);
-    border-color: rgba(232,100,44,0.62);
-  }
-  .pc-heading {
+  .plv-table:has(.plv-body:empty) { display: none; }
+  .plv-head, .plv-row {
     display: grid;
-    grid-template-columns: 42px minmax(0,1fr) auto;
-    align-items: start;
-    gap: 10px;
-  }
-  .pc-heading-copy { min-width: 0; }
-  .pc-heading .pc-top { display: block; }
-  .pc-heading .pc-premier {
-    grid-column: 3;
-    grid-row: 1;
-    align-self: start;
-  }
-  .pc-heading .pc-cat { margin-top: 3px; }
-  .plv-grid .pc-name {
-    display: inline;
-    font-size: 16px;
-    line-height: 1.25;
-    color: #ffffff;
-  }
-  .plv-grid .pc-cat {
-    color: #ffffff;
-    font-size: 12px;
-    line-height: 1.3;
-  }
-  .plv-grid .pc-sub {
-    margin-left: 52px;
-    color: #ffffff;
-  }
-  .plv-grid .pc-contact,
-  .plv-grid .pc-meta-row {
-    color: rgba(206,226,235,0.68);
-  }
-  .plv-grid .pc-actions { margin-top: auto; padding-top: 4px; }
-  /* ---------- LIST CARD restructure: header / classification / contact /
-     geography / actions. Scoped to .plv-grid only. ---------- */
-  .plv-grid { align-items: start; }
-  .plv-grid .partner-card { height: auto; padding: 15px; gap: 7px; }
-  .plv-grid .pc-heading {
-    grid-template-columns: 36px minmax(0,1fr) auto;
+    grid-template-columns: var(--plv-cols);
+    column-gap: 14px;
     align-items: center;
   }
-  .plv-grid .pc-category-icon { width: 36px; height: 36px; flex-basis: 36px; }
-  .plv-grid .pc-heading .pc-premier { grid-column: 3; grid-row: 1; align-self: center; }
-  .plv-grid .pc-name { display: block; font-size: 15.5px; font-weight: 800; line-height: 1.3; }
-  .plv-grid .pc-class { display: flex; flex-direction: column; gap: 2px; }
-  .plv-grid .pc-cat { font-size: 13px; font-weight: 400; line-height: 1.35; }
-  .plv-grid .pc-sub { margin-left: 0; font-size: 13px; line-height: 1.4; }
-  .plv-grid .pc-contact,
-  .plv-grid .pc-meta-row { font-size: 13px; font-weight: 400; line-height: 1.4; align-items: flex-start; gap: 7px; }
-  .plv-grid .pc-geo { display: flex; flex-direction: column; gap: 3px; }
-  .plv-grid .pc-icon-geo,
-  .plv-grid .pc-icon-contact,
-  .plv-grid .pc-meta-row img.pc-office-icon {
-    width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; display: block; object-fit: contain;
+  .plv-head {
+    position: sticky;
+    top: -24px;
+    z-index: 1;
+    background: #eef3f8;
+    margin: 0 -18px;
+    padding: 11px 18px;
+    border-radius: 10px 10px 0 0;
+    border-bottom: 1px solid var(--plv-line);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #3d5064;
   }
-  .plv-grid .pc-actions {
+  .plv-h-suffix { display: none; }
+  .plv-row {
+    padding: 13px 0;
+    border-bottom: 1px solid var(--plv-line);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.4;
+    transition: background 0.12s ease;
+  }
+  .plv-row:last-child { border-bottom: 0; }
+  .plv-row:hover, .plv-row.selected, .plv-row:focus-visible {
+    background: #f6f9fc;
+    box-shadow: inset 3px 0 0 var(--nwx-orange);
+    outline: none;
+  }
+  .plv-cell { min-width: 0; overflow-wrap: break-word; }
+  .plv-partner { display: flex; align-items: center; gap: 12px; }
+  .plv-visual { position: relative; flex: 0 0 52px; }
+  .plv-cat-badge {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--nwx-navy);
+    border: 2px solid #ffffff;
+    padding: 3px;
+    display: flex;
+  }
+  .plv-cat-badge img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .plv-logo-tile {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .plv-logo-tile.is-logo { background: #ffffff; border: 1px solid var(--plv-line); padding: 4px; }
+  .plv-logo-tile.is-icon { background: var(--nwx-navy); padding: 6px; }
+  .plv-logo-tile img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .plv-name-wrap { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .plv-name { font-size: 15.5px; font-weight: 800; line-height: 1.3; color: var(--plv-ink); }
+  .plv-cat { color: var(--nwx-orange); font-weight: 500; }
+  .plv-sub, .plv-muted { color: var(--plv-muted); }
+  .plv-with-icon { display: flex; align-items: flex-start; gap: 8px; }
+  .plv-with-icon + .plv-with-icon { margin-top: 3px; }
+  .plv-row .pc-icon-geo, .plv-row .pc-icon-contact {
+    width: 16px; height: 16px; flex: 0 0 16px; margin-top: 2px; color: var(--plv-icon);
+  }
+  .plv-row img.plv-office-icon { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 2px; object-fit: contain; display: block; }
+  .plv-actions .pc-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-top: 3px;
-    padding-top: 0;
+    margin: 0;
   }
-  .plv-grid .pc-actions .pc-btn:only-child { grid-column: 1 / -1; }
-  .plv-grid .pc-btn { font-size: 13px; font-weight: 700; padding: 8px 10px; min-width: 0; }
+  .plv-actions .pc-btn:only-child { grid-column: 1 / -1; }
+  .plv-actions .pc-btn {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 10px;
+    min-width: 0;
+    border-radius: 7px;
+    white-space: nowrap;
+  }
+  .plv-actions .pc-btn:not(.pc-btn-primary) {
+    background: #ffffff;
+    color: var(--plv-ink);
+    border: 1px solid #c5d1dc;
+  }
+  .plv-actions .pc-btn:not(.pc-btn-primary):hover { border-color: var(--nwx-orange); color: var(--nwx-orange); background: #fff; }
+
+  /* Mid width (860–1015px List area): buttons stack in a narrower Actions column. */
+  @container plv (max-width: 1015px) {
+    .plv-table { --plv-cols: minmax(180px, 1.35fr) minmax(135px, 1.2fr) minmax(115px, 1fr) minmax(95px, 0.7fr) minmax(110px, 0.9fr) 140px; }
+    .plv-head, .plv-row { column-gap: 14px; }
+    .plv-actions .pc-actions { grid-template-columns: 1fr; }
+    .plv-actions .pc-btn:only-child { grid-column: auto; }
+  }
+  /* Tablet: Country + Regions share one Location column (still two lines). */
+  @container plv (max-width: 859px) {
+    .plv-table { --plv-cols: minmax(140px, 1.3fr) minmax(115px, 1.1fr) minmax(105px, 1fr) minmax(105px, 1fr) 130px; }
+    .plv-head, .plv-row { column-gap: 12px; }
+    .plv-head, .plv-row {
+      grid-template-areas:
+        "partner cls contact country actions"
+        "partner cls contact regions actions";
+    }
+    .plv-head { grid-template-areas: "partner cls contact country actions"; }
+    .plv-h-partner, .plv-partner { grid-area: partner; }
+    .plv-h-class, .plv-class { grid-area: cls; }
+    .plv-h-contact, .plv-contact { grid-area: contact; }
+    .plv-h-country, .plv-country { grid-area: country; }
+    .plv-regions { grid-area: regions; margin-top: 3px; }
+    .plv-h-regions { display: none; }
+    .plv-h-suffix { display: inline; }
+    .plv-h-actions, .plv-actions { grid-area: actions; }
+    .plv-country { align-self: end; }
+    .plv-regions { align-self: start; }
+  }
+  /* Mobile: each row becomes a stacked block in the same field order. */
+  @container plv (max-width: 639px) {
+    .plv-table { padding: 4px 14px; }
+    .plv-head { display: none; }
+    .plv-row {
+      grid-template-columns: 1fr;
+      grid-template-areas: none;
+      row-gap: 8px;
+      padding: 14px 0;
+    }
+    .plv-row > .plv-cell { grid-area: auto; margin-top: 0; }
+    .plv-row:hover, .plv-row.selected, .plv-row:focus-visible { box-shadow: none; }
+    .plv-contact:empty { display: none; }
+    .plv-actions { margin-top: 4px; }
+    .plv-actions .pc-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .plv-actions .pc-btn:only-child { grid-column: 1 / -1; }
+  }
   #partner-list-view {
     scrollbar-color: rgba(206,226,235,0.24) transparent;
     scrollbar-width: thin;
@@ -1491,7 +1559,17 @@
 
     
     <div id="partner-list-view">
-      <div class="plv-grid" id="partner-list-grid"></div>
+      <div class="plv-table" role="table" aria-label="Partner directory">
+        <div class="plv-head" role="row">
+          <div class="plv-h-partner" role="columnheader">Partner</div>
+          <div class="plv-h-class" role="columnheader">Category / Subcategories</div>
+          <div class="plv-h-contact" role="columnheader">Contact</div>
+          <div class="plv-h-country" role="columnheader">Country<span class="plv-h-suffix"> / Regions</span></div>
+          <div class="plv-h-regions" role="columnheader">Regions</div>
+          <div class="plv-h-actions" role="columnheader">Actions</div>
+        </div>
+        <div class="plv-body" id="partner-list-grid" role="rowgroup"></div>
+      </div>
     </div>
 
     
@@ -2646,9 +2724,18 @@
   }
 
   // ---- filtering (Task 3): search + all four filters combine (AND) ----
+  // Shared A–Z ordering for every rendered partner collection (List,
+  // sidebar, search results, region/country popups). Frontend only — the
+  // source feed and allPartners keep their original order and __id values.
+  function sortPartnersByName(list) {
+    return list.slice().sort(function (a, b) {
+      return String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
+    });
+  }
+
   function getFilteredPartners() {
     var q = filters.search.trim().toLowerCase();
-    return allPartners.filter(function (p) {
+    return sortPartnersByName(allPartners.filter(function (p) {
       if (filters.regions.length && !partnerRegions(p).some(function (v) { return filters.regions.indexOf(v) !== -1; })) return false;
       if (filters.countries.length && filters.countries.indexOf(p.country) === -1) return false;
       if (filters.categories.length && filters.categories.indexOf(p.category) === -1) return false;
@@ -2664,7 +2751,7 @@
         if (haystack.indexOf(q) === -1) return false;
       }
       return true;
-    });
+    }));
   }
 
   // ---- icon helpers (redesign pass) — inline SVG, matching the approved
@@ -2673,8 +2760,6 @@
   // render. No new asset files; icons are pure inline markup + CSS. ----
   var ICON_GEO = '<svg class="pc-icon-geo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"></path></svg>';
   var ICON_CONTACT = '<svg class="pc-icon-contact" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c.8-4.2 3.5-6 8-6s7.2 1.8 8 6"></path></svg>'; var ICON_OFFICE = '<img class="ppo-icon-office" src="assets/Office.png" alt="" aria-hidden="true">';
-  // List-card-only Country icon (light variant). Partner Preview keeps the orange ICON_OFFICE.
-  var ICON_OFFICE_LIST = '<img class="pc-office-icon" src="assets/Office-light.png" alt="" aria-hidden="true">';
   var ICON_WEBSITE = '<svg class="pc-icon-website" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M10 14 20 4"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"></path></svg>';
   var ICON_CHEVRON = '<svg class="mc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>';
   var CATEGORY_ICON_FILES = {
@@ -2700,11 +2785,6 @@
   }
 
 
-  function contactLineHTML(p) {
-    if (!p.contactName && !p.contactTitle) return "";
-    return '<div class="pc-contact">' + ICON_CONTACT +
-      '<span>' + escapeHtml([p.contactName, p.contactTitle].filter(Boolean).join(" · ")) + "</span></div>";
-  }
   function actionsHTML(p) {
     var contactHref = p.contactUrl ? escapeAttr(p.contactUrl) : "";
     var websiteHref = p.websiteUrl ? escapeAttr(p.websiteUrl) : "";
@@ -2750,18 +2830,6 @@
       (pageHref ? '<a class="pc-btn" data-nwx-action="partner_page_click"' + analyticsAttrs + ' href="' + pageHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open Full Partner Page</a>' : "")
     );
   }
-  // List card geography: Country and Regions on separate rows (Office icon /
-  // globe icon), each omitted when blank. Never joined into one sentence.
-  function geoLineHTML(p) {
-    var regions = partnerRegions(p);
-    var regionsLabel = p.regionsDisplay || regions.join(", ");
-    if (!p.country && !regionsLabel) return "";
-    return '<div class="pc-geo">' +
-      (p.country ? '<div class="pc-meta-row has-icon">' + ICON_OFFICE_LIST + "<span>" + escapeHtml(p.country) + "</span></div>" : "") +
-      (regionsLabel ? '<div class="pc-meta-row has-icon">' + ICON_GEO + "<span>" + escapeHtml(regionsLabel) + "</span></div>" : "") +
-      "</div>";
-  }
-
   // Partner name: link to partnerPageUrl, same tab, when present; plain
   // text when missing (Task 5). Used by both the full grid card and the
   // floating/preview panels. stopPropagation so clicking the name link
@@ -2774,37 +2842,79 @@
     return '<span class="' + cssClass + '">' + text + "</span>";
   }
 
-  // ---- full card rendering (List-mode grid only). Section order:
-  // 1 Header (icon + name) -> 2 Classification (category, subcategories)
-  // -> 3 Contact (hidden when blank) -> 4 Geography (Country row, Regions
-  // row) -> 5 Actions (always last). Name is plain text here so a click
-  // anywhere in the informational area opens the Partner Preview; the
-  // partner page stays reachable via the Preview's "Open Full Partner Page".
-  function cardHTML(p) {
+  // ---- List view table rows. Partner | Category/Subcategories | Contact |
+  // Country | Regions | Actions. Name is plain text so a click anywhere in
+  // the informational cells opens the Partner Preview; CTAs stop
+  // propagation (actionsHTML) and keep their analytics attributes.
+  var ICON_OFFICE_TABLE = '<img class="plv-office-icon" src="assets/Office.png" alt="" aria-hidden="true">';
+
+  // Partner visual: logo (primary) with the category icon as a small
+  // secondary badge; no logo -> category icon is the primary visual.
+  function rowLogoHTML(p) {
+    if (p.logoUrl) {
+      var badge = categoryIconHTML(p, "plv-cat-badge-icon");
+      return '<div class="plv-visual"><div class="plv-logo-tile is-logo"><img class="plv-logo" src="' + escapeAttr(p.logoUrl) + '" alt="" loading="lazy"></div>' +
+        (badge ? '<span class="plv-cat-badge">' + badge + "</span>" : "") + "</div>";
+    }
+    var icon = categoryIconHTML(p, "plv-cat-icon");
+    return icon ? '<div class="plv-visual"><div class="plv-logo-tile is-icon">' + icon + "</div></div>" : "";
+  }
+
+  function rowHTML(p) {
     var subs = partnerSubcats(p);
+    var regionLines = (p.regionsDisplay ? String(p.regionsDisplay).split(/\s*,\s*/) : partnerRegions(p)).filter(Boolean);
+    var hasContact = p.contactName || p.contactTitle;
     return (
-      '<div class="pc-heading">' +
-        categoryIconHTML(p, "pc-category-icon") +
-        '<span class="pc-name">' + escapeHtml(p.name) + "</span>" +
-        (isPremier(p) ? '<span class="pc-premier">Premier</span>' : "") +
+      '<div class="plv-cell plv-partner" role="cell">' +
+        rowLogoHTML(p) +
+        '<div class="plv-name-wrap"><span class="plv-name">' + escapeHtml(p.name) + "</span>" +
+          (isPremier(p) ? '<span class="pc-premier">Premier</span>' : "") +
+        "</div>" +
       "</div>" +
-      '<div class="pc-class">' +
-        (p.category ? '<div class="pc-cat">' + escapeHtml(p.category) + "</div>" : "") +
-        (subs.length ? '<div class="pc-sub">' + escapeHtml(subs.join(", ")) + "</div>" : "") +
+      '<div class="plv-cell plv-class" role="cell">' +
+        (p.category ? '<div class="plv-cat">' + escapeHtml(p.category) + "</div>" : "") +
+        (subs.length ? '<div class="plv-sub">' + escapeHtml(subs.join(", ")) + "</div>" : "") +
       "</div>" +
-      contactLineHTML(p) +
-      geoLineHTML(p) +
-      actionsHTML(p)
+      '<div class="plv-cell plv-contact" role="cell">' +
+        (hasContact
+          ? '<div class="plv-with-icon">' + ICON_CONTACT + "<div>" +
+              (p.contactName ? "<div>" + escapeHtml(p.contactName) + "</div>" : "") +
+              (p.contactTitle ? '<div class="plv-muted">' + escapeHtml(p.contactTitle) + "</div>" : "") +
+            "</div></div>"
+          : "") +
+      "</div>" +
+      '<div class="plv-cell plv-country" role="cell">' +
+        (p.country ? '<div class="plv-with-icon">' + ICON_OFFICE_TABLE + "<span>" + escapeHtml(p.country) + "</span></div>" : "") +
+      "</div>" +
+      '<div class="plv-cell plv-regions" role="cell">' +
+        (regionLines.length ? '<div class="plv-with-icon">' + ICON_GEO + "<div>" +
+          regionLines.map(function (r) { return "<div>" + escapeHtml(r) + "</div>"; }).join("") + "</div></div>" : "") +
+      "</div>" +
+      '<div class="plv-cell plv-actions" role="cell">' + actionsHTML(p) + "</div>"
     );
   }
 
-  function buildCardEl(p) {
+  function buildRowEl(p) {
     var el = document.createElement("div");
-    el.className = "partner-card" + (p.__id === selectedId ? " selected" : "");
+    el.className = "plv-row" + (p.__id === selectedId ? " selected" : "");
+    el.setAttribute("role", "row");
+    el.setAttribute("tabindex", "0");
     el.setAttribute("data-partner-id", p.__id);
-    el.innerHTML = cardHTML(p);
-    // Grid cards open the full Preview Overlay directly (Task 6).
+    el.innerHTML = rowHTML(p);
+    // Broken/blocked logo -> fall back to the category icon tile.
+    var logo = el.querySelector("img.plv-logo");
+    if (logo) {
+      logo.onerror = function () {
+        var visual = logo.closest(".plv-visual");
+        var icon = categoryIconHTML(p, "plv-cat-icon");
+        if (icon) visual.innerHTML = '<div class="plv-logo-tile is-icon">' + icon + "</div>";
+        else visual.parentNode.removeChild(visual);
+      };
+    }
     el.addEventListener("click", function () { openPreviewOverlay(p, "main_list"); });
+    el.addEventListener("keydown", function (e) {
+      if ((e.key === "Enter" || e.key === " ") && e.target === el) { e.preventDefault(); openPreviewOverlay(p, "main_list"); }
+    });
     return el;
   }
 
@@ -2856,7 +2966,7 @@
     var filtered = getFilteredPartners();
     renderSelectedFilterChips();
     renderInto(railList, filtered, buildCompactCardEl);
-    renderInto(listGrid, filtered, buildCardEl);
+    renderInto(listGrid, filtered, buildRowEl);
     trackMainListImpressions(filtered);
     dispatchPartnerFilterState();
   }
@@ -2864,13 +2974,11 @@
   // the two datasets separate while allowing a region popup to list matching
   // Partner Directory companies beneath the account summary.
   window.nwxPartnerDirectoryForMapContext = function (regionName, countryName) {
-    return getFilteredPartners().filter(function (p) {
+    return sortPartnersByName(getFilteredPartners().filter(function (p) {
       if (regionName && partnerRegions(p).indexOf(regionName) === -1) return false;
       if (countryName && p.country !== countryName) return false;
       return true;
-    }).sort(function (a, b) {
-      return String(a.name || "").localeCompare(String(b.name || ""));
-    });
+    }));
   };
 
   window.nwxPartnerCategoryIconSrc = function (category) {
@@ -2947,7 +3055,7 @@
   };
 
   function syncSelectedHighlight() {
-    document.querySelectorAll(".partner-card, .mini-card").forEach(function (el) {
+    document.querySelectorAll(".partner-card, .plv-row, .mini-card").forEach(function (el) {
       el.classList.toggle("selected", el.getAttribute("data-partner-id") === String(selectedId));
     });
   }
@@ -3148,7 +3256,7 @@
     var source = "";
     if (link.closest("#partner-preview-overlay")) source = "detail_modal";
     else if (link.closest("#partner-profile-card")) source = "sidebar";
-    else if (link.closest(".partner-card")) source = "main_list";
+    else if (link.closest(".partner-card, .plv-row")) source = "main_list";
     else if (link.closest(".mini-card")) source = "sidebar";
     window.nwxTrackEvent(action, {
       partner_name: link.getAttribute("data-nwx-partner-name") || "",
@@ -3220,7 +3328,7 @@
     .catch(function (err) {
       console.error("Failed to load Partner Directory (data/partners.json):", err);
       renderInto(railList, [], buildCompactCardEl);
-      renderInto(listGrid, [], buildCardEl);
+      renderInto(listGrid, [], buildRowEl);
     });
 
 })();
