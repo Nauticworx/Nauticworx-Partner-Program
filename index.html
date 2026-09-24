@@ -1111,7 +1111,7 @@
   #rail .filter-chip:hover,
   #rail .filter-chip:focus {
     border-color: var(--nwx-orange);
-    background: #fff7f2;
+    background: #021229;
     outline: none;
   }
   #rail .filter-chip .filter-chip-x {
@@ -1244,6 +1244,37 @@
     color: rgba(206,226,235,0.68);
   }
   .plv-grid .pc-actions { margin-top: auto; padding-top: 4px; }
+  /* ---------- LIST CARD restructure: header / classification / contact /
+     geography / actions. Scoped to .plv-grid only. ---------- */
+  .plv-grid { align-items: start; }
+  .plv-grid .partner-card { height: auto; padding: 15px; gap: 7px; }
+  .plv-grid .pc-heading {
+    grid-template-columns: 36px minmax(0,1fr) auto;
+    align-items: center;
+  }
+  .plv-grid .pc-category-icon { width: 36px; height: 36px; flex-basis: 36px; }
+  .plv-grid .pc-heading .pc-premier { grid-column: 3; grid-row: 1; align-self: center; }
+  .plv-grid .pc-name { display: block; font-size: 15.5px; font-weight: 800; line-height: 1.3; }
+  .plv-grid .pc-class { display: flex; flex-direction: column; gap: 2px; }
+  .plv-grid .pc-cat { font-size: 13px; font-weight: 400; line-height: 1.35; }
+  .plv-grid .pc-sub { margin-left: 0; font-size: 13px; line-height: 1.4; }
+  .plv-grid .pc-contact,
+  .plv-grid .pc-meta-row { font-size: 13px; font-weight: 400; line-height: 1.4; align-items: flex-start; gap: 7px; }
+  .plv-grid .pc-geo { display: flex; flex-direction: column; gap: 3px; }
+  .plv-grid .pc-icon-geo,
+  .plv-grid .pc-icon-contact,
+  .plv-grid .pc-meta-row img.ppo-icon-office {
+    width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; display: block; object-fit: contain;
+  }
+  .plv-grid .pc-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 3px;
+    padding-top: 0;
+  }
+  .plv-grid .pc-actions .pc-btn:only-child { grid-column: 1 / -1; }
+  .plv-grid .pc-btn { font-size: 13px; font-weight: 700; padding: 8px 10px; min-width: 0; }
   #partner-list-view {
     scrollbar-color: rgba(206,226,235,0.24) transparent;
     scrollbar-width: thin;
@@ -1456,7 +1487,7 @@
        is now primary; this remains fully functional, just not dominant). -->
   <div class="rail-browse">
     <div class="rail-browse-header">
-      <button id="back-btn" type="button">&#8592; Worldwide</button>
+      <button id="back-btn" type="button">&#8592; Global</button>
       <div id="breadcrumb"></div>
     </div>
     <button class="rail-browse-toggle" id="browse-toggle" type="button" aria-expanded="false" aria-controls="browse-body">
@@ -1479,7 +1510,7 @@
           alt="Nauticworx Partner Program"
           class="partner-program-logo partner-program-logo-mobile"
         >
-        <button id="mobile-back" type="button">&#8592; World</button>
+        <button id="mobile-back" type="button">&#8592; Global</button>
       </div>
       <div class="view-toggle view-toggle-mobile" role="tablist" aria-label="Map or List view">
         <button id="toggle-map-m" class="active" type="button">Map</button>
@@ -1929,7 +1960,7 @@
     _lastIsMobile = isMobile();
 
     listTitle.textContent = "Regions";
-    breadcrumb.innerHTML = '<span class="crumb-current">World view</span>';
+    breadcrumb.innerHTML = '<span class="crumb-current">Global</span>';
     backBtn.classList.remove("visible");
     mobileBack.classList.remove("visible");
     renderContextStat();
@@ -2754,12 +2785,16 @@
       (pageHref ? '<a class="pc-btn" data-nwx-action="partner_page_click"' + analyticsAttrs + ' href="' + pageHref + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open Full Partner Page</a>' : "")
     );
   }
+  // List card geography: Country and Regions on separate rows (Office icon /
+  // globe icon), each omitted when blank. Never joined into one sentence.
   function geoLineHTML(p) {
     var regions = partnerRegions(p);
     var regionsLabel = p.regionsDisplay || regions.join(", ");
-    var text = [p.country, regionsLabel].filter(Boolean).join(" · ");
-    if (!text) return "";
-    return '<div class="pc-meta-row has-icon">' + ICON_GEO + "<span>" + escapeHtml(text) + "</span></div>";
+    if (!p.country && !regionsLabel) return "";
+    return '<div class="pc-geo">' +
+      (p.country ? '<div class="pc-meta-row has-icon">' + ICON_OFFICE + "<span>" + escapeHtml(p.country) + "</span></div>" : "") +
+      (regionsLabel ? '<div class="pc-meta-row has-icon">' + ICON_GEO + "<span>" + escapeHtml(regionsLabel) + "</span></div>" : "") +
+      "</div>";
   }
 
   // Partner name: link to partnerPageUrl, same tab, when present; plain
@@ -2774,24 +2809,27 @@
     return '<span class="' + cssClass + '">' + text + "</span>";
   }
 
-  // ---- full card rendering (List-mode grid only — Task 3/4). Approved
-  // field order: name -> category -> subcategories -> contact name/title ->
-  // Contact Partner button -> Visit Website button -> Country/Regions last.
+  // ---- full card rendering (List-mode grid only). Section order:
+  // 1 Header (icon + name) -> 2 Classification (category, subcategories)
+  // -> 3 Contact (hidden when blank) -> 4 Geography (Country row, Regions
+  // row) -> 5 Actions (always last). Name is plain text here so a click
+  // anywhere in the informational area opens the Partner Preview; the
+  // partner page stays reachable via the Preview's "Open Full Partner Page".
   function cardHTML(p) {
     var subs = partnerSubcats(p);
     return (
       '<div class="pc-heading">' +
         categoryIconHTML(p, "pc-category-icon") +
-        '<div class="pc-heading-copy">' +
-          '<div class="pc-top">' + nameHTML(p, "pc-name") + "</div>" +
-          '<div class="pc-cat">' + escapeHtml(p.category || "") + "</div>" +
-        "</div>" +
+        '<span class="pc-name">' + escapeHtml(p.name) + "</span>" +
         (isPremier(p) ? '<span class="pc-premier">Premier</span>' : "") +
       "</div>" +
-      (subs.length ? '<div class="pc-sub">' + escapeHtml(subs.join(", ")) + "</div>" : "") +
+      '<div class="pc-class">' +
+        (p.category ? '<div class="pc-cat">' + escapeHtml(p.category) + "</div>" : "") +
+        (subs.length ? '<div class="pc-sub">' + escapeHtml(subs.join(", ")) + "</div>" : "") +
+      "</div>" +
       contactLineHTML(p) +
-      actionsHTML(p) +
-      geoLineHTML(p)
+      geoLineHTML(p) +
+      actionsHTML(p)
     );
   }
 
