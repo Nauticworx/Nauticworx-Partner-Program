@@ -1835,6 +1835,11 @@
     attributionControl: true
   });
   map.touchZoomRotate.disableRotation();
+
+  if (isMobile()) {
+  map.dragPan.disable();
+}
+
   map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
   // ---- Nauticworx re-skin of the base Mapbox style ----
