@@ -1491,6 +1491,33 @@
     border-color: rgba(232,100,44,0.35);
   }
   #rail .region-row .name { color: #021229; }
+
+  /* ---------- DESKTOP RAIL: only the partner results list scrolls.
+     Logo, toggle, search, filters, reset and Browse by Region keep their
+     natural height; the list takes the remaining rail height. Scrollbar
+     matches the white-rail #rail scrollbar above. Desktop only. ---------- */
+  @media (min-width: 861px) {
+    #rail { overflow: hidden; }
+    #rail .partner-card-list {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-color: rgba(2,18,41,0.22) transparent;
+      scrollbar-width: thin;
+    }
+    #rail .partner-card-list::-webkit-scrollbar { width: 8px; }
+    #rail .partner-card-list::-webkit-scrollbar-track { background: transparent; }
+    #rail .partner-card-list::-webkit-scrollbar-thumb {
+      background: rgba(2,18,41,0.18);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    #rail .partner-card-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(2,18,41,0.30);
+      background-clip: padding-box;
+    }
+  }
 </style>
 </head>
 <body>
