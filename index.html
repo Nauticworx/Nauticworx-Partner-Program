@@ -1466,13 +1466,24 @@
   }
   #rail .view-toggle button { color: rgba(2,18,41,0.65); }
   #rail .view-toggle button.active { background: var(--nwx-orange); color: #fff; }
-  #rail .mini-card .mc-name { color: #021229; }
-  #rail .mini-card .mc-meta { color: rgba(2,18,41,0.55); }
-  #rail .mini-card:hover,
-  #rail .mini-card.selected {
-    background: rgba(2,18,41,0.04);
-    border-color: rgba(232,100,44,0.45);
-  }
+#rail .mini-card {
+  background: #021229;
+  border-color: rgba(2,18,41,0.10);
+}
+
+#rail .mini-card .mc-name {
+  color: #ffffff;
+}
+
+#rail .mini-card .mc-meta {
+  color: #cee2eb;
+}
+
+#rail .mini-card:hover,
+#rail .mini-card.selected {
+  background: #06192f;
+  border-color: var(--nwx-orange);
+}
   #rail .rail-browse { border-top-color: rgba(2,18,41,0.12); }
   #rail .rail-browse-toggle .browse-chev { color: rgba(2,18,41,0.45); }
   #rail #breadcrumb { color: rgba(2,18,41,0.65); }
@@ -2993,7 +3004,7 @@
   // contact/actions/geo, so the rail never duplicates the full card. ----
   function compactCardHTML(p) {
     return (
-      categoryIconDarkHTML(p, "mc-category-icon") +
+      categoryIconHTML(p, "mc-category-icon") +
       '<div class="mc-text">' + nameHTML(p, "mc-name") +
       '<div class="mc-meta">' + escapeHtml(p.category || "") + "</div></div>" +
       ICON_CHEVRON
