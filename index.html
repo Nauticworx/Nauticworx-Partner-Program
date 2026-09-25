@@ -1446,6 +1446,51 @@
     .nwx-chip .chip-name { font-size: 10.5px; }
     .nwx-chip .chip-count { font-size: 12px; }
   }
+
+  /* ---------- DESKTOP RAIL: light theme (visual-only, scoped to #rail).
+     #rail is display:none at <=860px, so none of this reaches mobile.
+     Search/filter controls, filter chips and the reset icon keep their
+     existing #rail rules unchanged. ---------- */
+  #rail {
+    background: #ffffff;
+    color: #021229;
+    border-right: 1px solid rgba(2,18,41,0.12);
+    scrollbar-color: rgba(2,18,41,0.22) transparent;
+  }
+  #rail::-webkit-scrollbar-thumb { background: rgba(2,18,41,0.18); background-clip: padding-box; }
+  #rail::-webkit-scrollbar-thumb:hover { background: rgba(2,18,41,0.30); background-clip: padding-box; }
+  #rail .rail-section-title { color: rgba(2,18,41,0.55); }
+  #rail .view-toggle {
+    background: rgba(2,18,41,0.04);
+    border-color: rgba(2,18,41,0.12);
+  }
+  #rail .view-toggle button { color: rgba(2,18,41,0.65); }
+  #rail .view-toggle button.active { background: var(--nwx-orange); color: #fff; }
+  #rail .mini-card .mc-name { color: #021229; }
+  #rail .mini-card .mc-meta { color: rgba(2,18,41,0.55); }
+  #rail .mini-card:hover,
+  #rail .mini-card.selected {
+    background: rgba(2,18,41,0.04);
+    border-color: rgba(232,100,44,0.45);
+  }
+  #rail .rail-browse { border-top-color: rgba(2,18,41,0.12); }
+  #rail .rail-browse-toggle .browse-chev { color: rgba(2,18,41,0.45); }
+  #rail #breadcrumb { color: rgba(2,18,41,0.65); }
+  #rail #back-btn {
+    background: #ffffff;
+    border-color: rgba(2,18,41,0.16);
+    color: #021229;
+  }
+  #rail #back-btn:hover { background: rgba(2,18,41,0.04); }
+  #rail .region-row {
+    background: #ffffff;
+    border-color: rgba(2,18,41,0.12);
+  }
+  #rail .region-row:hover {
+    background: rgba(232,100,44,0.08);
+    border-color: rgba(232,100,44,0.35);
+  }
+  #rail .region-row .name { color: #021229; }
 </style>
 </head>
 <body>
@@ -1456,7 +1501,7 @@
 <div id="rail">
   <div class="rail-top">
     <img
-      src="assets/Partner Program White (Horizontal).png"
+      src="assets/Partner Program (Horizontal).png"
       alt="Nauticworx Partner Program"
       class="partner-program-logo partner-program-logo-desktop"
     >
@@ -2921,7 +2966,7 @@
   // contact/actions/geo, so the rail never duplicates the full card. ----
   function compactCardHTML(p) {
     return (
-      categoryIconHTML(p, "mc-category-icon") +
+      categoryIconDarkHTML(p, "mc-category-icon") +
       '<div class="mc-text">' + nameHTML(p, "mc-name") +
       '<div class="mc-meta">' + escapeHtml(p.category || "") + "</div></div>" +
       ICON_CHEVRON
